@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import PulseOximeter from "@/components/dashboard/PulseOximeter";
 import MovementTracker from "@/components/dashboard/MovementTracker";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
+import AddPatientDialog from "@/components/dashboard/AddPatientDialog";
 
 type PatientStatus = "stable" | "warning" | "critical";
 
@@ -47,6 +47,7 @@ const Dashboard = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userType, setUserType] = useState<string>('');
+  const [isAddPatientOpen, setIsAddPatientOpen] = useState(false);
 
   useEffect(() => {
     // Load user data from localStorage (demo purposes)
@@ -86,6 +87,12 @@ const Dashboard = () => {
     return 'Healthcare Professional';
   };
 
+  const handleAddPatient = (newPatient: Patient) => {
+    console.log('New patient added:', newPatient);
+    // In a real app, this would make an API call to save the patient
+    // For now, we'll just log it and could update local state if needed
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-background">
       {/* Header */}
@@ -113,7 +120,7 @@ const Dashboard = () => {
               <Button variant="outline" onClick={() => setIsSettingsOpen(true)}>
                 Settings
               </Button>
-              <Button>Add Patient</Button>
+              <Button onClick={() => setIsAddPatientOpen(true)}>Add Patient</Button>
             </div>
           </div>
         </div>
@@ -201,6 +208,13 @@ const Dashboard = () => {
           <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
         </DialogContent>
       </Dialog>
+
+      {/* Add Patient Dialog */}
+      <AddPatientDialog
+        open={isAddPatientOpen}
+        onOpenChange={setIsAddPatientOpen}
+        onAddPatient={handleAddPatient}
+      />
     </div>
   );
 };
