@@ -355,5 +355,3 @@ const HealthMetrics = ({ patientId, patientName }: HealthMetricsProps) => {
 };
 
 export default HealthMetrics;
-
-}

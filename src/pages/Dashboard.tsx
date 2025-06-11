@@ -147,6 +147,9 @@ const Dashboard = () => {
     ));
   };
 
+  // Get other patients (excluding the selected one) for the AI assistant
+  const otherPatients = patients.filter(p => p.id !== selectedPatient.id);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-background">
       {/* Header */}
@@ -276,7 +279,7 @@ const Dashboard = () => {
                   </TabsContent>
 
                   <TabsContent value="ai-assistant" className="space-y-6">
-                    <DrJegAssistant patient={selectedPatient} />
+                    <DrJegAssistant patient={selectedPatient} patients={otherPatients} />
                   </TabsContent>
                 </Tabs>
               </>

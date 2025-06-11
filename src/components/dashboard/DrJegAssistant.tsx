@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Brain, Send, User, Bot, Heart, Activity, TrendingUp, AlertTriangle, Upload, FileText, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,6 +27,7 @@ interface Message {
   timestamp: Date;
   suggestions?: string[];
   documents?: UploadedDocument[];
+  taggedPatients?: Patient[];
 }
 
 interface UploadedDocument {
@@ -37,14 +40,15 @@ interface UploadedDocument {
 
 interface DrJegAssistantProps {
   patient: Patient;
+  patients?: Patient[];
 }
 
-const DrJegAssistant = ({ patient }: DrJegAssistantProps) => {
+const DrJegAssistant = ({ patient, patients = [] }: DrJegAssistantProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       type: 'ai',
-      content: `Hello! I'm Dr. JEG, your AI medical assistant. I've reviewed ${patient.name}'s current health data. You can upload health documents (lab reports, medical history, etc.) for deeper analysis. How can I help you today?`,
+      content: `Hello! I'm Dr. JEG, your AI medical assistant. I've reviewed ${patient.name}'s current health data. You can upload health documents (lab reports, medical history, etc.) for deeper analysis. You can also tag other patients using @ followed by their name to include their metrics in our discussion. How can I help you today?`,
       timestamp: new Date(),
       suggestions: [
         'Analyze current vital signs',
@@ -57,7 +61,97 @@ const DrJegAssistant = ({ patient }: DrJegAssistantProps) => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
+  const [showPatientSuggestions, setShowPatientSuggestions] = useState(false);
+  const [currentMentionQuery, setCurrentMentionQuery] = useState('');
+  const [mentionStartIndex, setMentionStartIndex] = useState(-1);
+  const [taggedPatients, setTaggedPatients] = useState<Patient[]>([]);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+
+  // All available patients including the current one
+  const allPatients = [patient, ...patients].filter((p, index, self) => 
+    index === self.findIndex(t => t.id === p.id)
+  );
+
+  useEffect(() => {
+    const handleInputChange = () => {
+      if (!inputRef.current) return;
+      
+      const cursorPosition = inputRef.current.selectionStart;
+      const textBeforeCursor = inputMessage.substring(0, cursorPosition);
+      const atIndex = textBeforeCursor.lastIndexOf('@');
+      
+      if (atIndex !== -1) {
+        const queryAfterAt = textBeforeCursor.substring(atIndex + 1);
+        const hasSpaceAfterAt = queryAfterAt.includes(' ');
+        
+        if (!hasSpaceAfterAt) {
+          setCurrentMentionQuery(queryAfterAt);
+          setMentionStartIndex(atIndex);
+          setShowPatientSuggestions(true);
+        } else {
+          setShowPatientSuggestions(false);
+        }
+      } else {
+        setShowPatientSuggestions(false);
+      }
+    };
+
+    handleInputChange();
+  }, [inputMessage]);
+
+  const handlePatientSelect = (selectedPatient: Patient) => {
+    if (!inputRef.current) return;
+    
+    const beforeMention = inputMessage.substring(0, mentionStartIndex);
+    const afterCursor = inputMessage.substring(inputRef.current.selectionStart);
+    const newMessage = `${beforeMention}@${selectedPatient.name} ${afterCursor}`;
+    
+    setInputMessage(newMessage);
+    setShowPatientSuggestions(false);
+    
+    // Add to tagged patients if not already tagged
+    if (!taggedPatients.find(p => p.id === selectedPatient.id)) {
+      setTaggedPatients(prev => [...prev, selectedPatient]);
+    }
+    
+    // Focus back to input
+    setTimeout(() => {
+      inputRef.current?.focus();
+      const newCursorPosition = mentionStartIndex + selectedPatient.name.length + 2;
+      inputRef.current?.setSelectionRange(newCursorPosition, newCursorPosition);
+    }, 0);
+  };
+
+  const getPatientHealthSummary = (patientData: Patient) => {
+    return `**${patientData.name}'s Current Health Metrics:**
+- **Age**: ${patientData.age} years
+- **Status**: ${patientData.status.toUpperCase()}
+- **Heart Rate**: ${patientData.heartRate || 'N/A'} bpm
+- **Oxygen Saturation**: ${patientData.oxygenLevel || 'N/A'}%
+- **Last Reading**: ${patientData.lastReading}
+- **Care Code**: ${patientData.careCode}`;
+  };
+
+  const extractTaggedPatients = (message: string): Patient[] => {
+    const mentionRegex = /@(\w+(?:\s+\w+)*)/g;
+    const matches = message.match(mentionRegex);
+    const tagged: Patient[] = [];
+    
+    if (matches) {
+      matches.forEach(match => {
+        const patientName = match.substring(1).trim();
+        const foundPatient = allPatients.find(p => 
+          p.name.toLowerCase().includes(patientName.toLowerCase())
+        );
+        if (foundPatient && !tagged.find(t => t.id === foundPatient.id)) {
+          tagged.push(foundPatient);
+        }
+      });
+    }
+    
+    return tagged;
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -104,7 +198,6 @@ const DrJegAssistant = ({ patient }: DrJegAssistantProps) => {
   };
 
   const generateDocumentAnalysis = (document: UploadedDocument): string => {
-    // Simulate AI analysis based on document content and name
     const fileName = document.name.toLowerCase();
     
     if (fileName.includes('blood') || fileName.includes('lab') || fileName.includes('test')) {
@@ -193,17 +286,26 @@ Based on the uploaded document and current patient data:
 **Disclaimer**: This analysis combines uploaded document review with current patient monitoring data. Clinical correlation and physician oversight required.`;
   };
 
-  const generateAIResponse = (userMessage: string): string => {
+  const generateAIResponse = (userMessage: string, taggedPatientsInMessage: Patient[]): string => {
     const lowerMessage = userMessage.toLowerCase();
+    
+    // Create health metrics summary for tagged patients
+    let taggedPatientsContext = '';
+    if (taggedPatientsInMessage.length > 0) {
+      taggedPatientsContext = '\n\n**📊 Patient Health Metrics Summary:**\n\n';
+      taggedPatientsInMessage.forEach(taggedPatient => {
+        taggedPatientsContext += getPatientHealthSummary(taggedPatient) + '\n\n';
+      });
+    }
     
     // Enhanced responses that consider uploaded documents
     if (uploadedDocuments.length > 0) {
       const docContext = `\n\n**📋 Document Context**: I've analyzed ${uploadedDocuments.length} document(s) for ${patient.name}: ${uploadedDocuments.map(d => d.name).join(', ')}`;
       
       if (lowerMessage.includes('vital') || lowerMessage.includes('heart rate') || lowerMessage.includes('oxygen')) {
-        return `Based on ${patient.name}'s current vitals and uploaded documents:
+        return `${taggedPatientsContext}Based on the current vitals and uploaded documents:
         
-**Current Vitals**:
+**Current Patient Analysis** (${patient.name}):
 - **Heart Rate**: ${patient.heartRate || 'N/A'} bpm - ${patient.heartRate && patient.heartRate > 90 ? 'Slightly elevated, correlate with document findings' : 'Within normal range'}
 - **Oxygen Saturation**: ${patient.oxygenLevel || 'N/A'}% - ${patient.oxygenLevel && patient.oxygenLevel < 95 ? 'Below optimal, review with uploaded reports' : 'Good saturation levels'}
 
@@ -216,19 +318,18 @@ Based on the uploaded document and current patient data:
       }
     }
     
-    // ... keep existing code (original response generation logic)
     if (lowerMessage.includes('vital') || lowerMessage.includes('heart rate') || lowerMessage.includes('oxygen')) {
-      return `Based on ${patient.name}'s current vitals:
+      return `${taggedPatientsContext}Based on the current patient vitals:
       
-**Heart Rate**: ${patient.heartRate || 'N/A'} bpm - ${patient.heartRate && patient.heartRate > 90 ? 'Slightly elevated, consider monitoring stress levels' : 'Within normal range'}
-
-**Oxygen Saturation**: ${patient.oxygenLevel || 'N/A'}% - ${patient.oxygenLevel && patient.oxygenLevel < 95 ? 'Below optimal, recommend oxygen therapy assessment' : 'Good saturation levels'}
+**${patient.name}'s Current Vitals**:
+- **Heart Rate**: ${patient.heartRate || 'N/A'} bpm - ${patient.heartRate && patient.heartRate > 90 ? 'Slightly elevated, consider monitoring stress levels' : 'Within normal range'}
+- **Oxygen Saturation**: ${patient.oxygenLevel || 'N/A'}% - ${patient.oxygenLevel && patient.oxygenLevel < 95 ? 'Below optimal, recommend oxygen therapy assessment' : 'Good saturation levels'}
 
 **Recommendation**: Continue current monitoring protocol. Consider 24-hour Holter monitoring if heart rate irregularities persist.`;
     }
     
     if (lowerMessage.includes('medication') || lowerMessage.includes('drug') || lowerMessage.includes('prescription')) {
-      return `**Medication Analysis for ${patient.name}**:
+      return `${taggedPatientsContext}**Medication Analysis for ${patient.name}**:
 
 Based on age (${patient.age}) and current status (${patient.status}):
 
@@ -243,7 +344,7 @@ Based on age (${patient.age}) and current status (${patient.status}):
     }
     
     if (lowerMessage.includes('trend') || lowerMessage.includes('analysis') || lowerMessage.includes('pattern')) {
-      return `**Health Trend Analysis for ${patient.name}**:
+      return `${taggedPatientsContext}**Health Trend Analysis for ${patient.name}**:
 
 **Past 24 Hours**:
 - Heart rate trending stable with minor fluctuations
@@ -258,7 +359,7 @@ Based on age (${patient.age}) and current status (${patient.status}):
     }
     
     if (lowerMessage.includes('emergency') || lowerMessage.includes('urgent') || lowerMessage.includes('alert')) {
-      return `**Emergency Protocol for ${patient.name}**:
+      return `${taggedPatientsContext}**Emergency Protocol for ${patient.name}**:
 
 **Current Status**: ${patient.status.toUpperCase()}
 
@@ -277,7 +378,7 @@ Based on age (${patient.age}) and current status (${patient.status}):
     }
     
     // Default response
-    return `I understand you're asking about "${userMessage}". Based on ${patient.name}'s current health profile:
+    return `${taggedPatientsContext}I understand you're asking about "${userMessage}". Based on ${patient.name}'s current health profile:
 
 **Patient Summary**:
 - Age: ${patient.age} years
@@ -289,21 +390,27 @@ Could you be more specific about what aspect of their care you'd like me to anal
 - Medication recommendations
 - Health trend analysis
 - Emergency protocols
-- Document analysis (upload health reports for deeper insights)`;
+- Document analysis (upload health reports for deeper insights)
+- Comparative analysis (tag other patients with @ to compare metrics)`;
   };
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
+    // Extract tagged patients from the message
+    const taggedPatientsInMessage = extractTaggedPatients(inputMessage);
+
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
       content: inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
+      taggedPatients: taggedPatientsInMessage
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setTaggedPatients([]);
     setIsLoading(true);
 
     // Simulate AI processing time
@@ -311,7 +418,7 @@ Could you be more specific about what aspect of their care you'd like me to anal
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: generateAIResponse(inputMessage),
+        content: generateAIResponse(inputMessage, taggedPatientsInMessage),
         timestamp: new Date()
       };
 
@@ -332,8 +439,11 @@ Could you be more specific about what aspect of their care you'd like me to anal
     });
   };
 
+  const removeTaggedPatient = (patientId: number) => {
+    setTaggedPatients(prev => prev.filter(p => p.id !== patientId));
+  };
+
   const formatMessage = (content: string) => {
-    // Simple markdown-like formatting
     return content
       .split('\n')
       .map((line, index) => {
@@ -361,9 +471,12 @@ Could you be more specific about what aspect of their care you'd like me to anal
       });
   };
 
+  const filteredPatients = allPatients.filter(p =>
+    p.name.toLowerCase().includes(currentMentionQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <Card>
         <CardHeader>
           <div className="flex items-center space-x-3">
@@ -501,6 +614,11 @@ Could you be more specific about what aspect of their care you'd like me to anal
                     <div className="text-sm">
                       {message.type === 'ai' ? formatMessage(message.content) : message.content}
                     </div>
+                    {message.taggedPatients && message.taggedPatients.length > 0 && (
+                      <div className="mt-2 text-xs opacity-75">
+                        👥 Tagged: {message.taggedPatients.map(p => p.name).join(', ')}
+                      </div>
+                    )}
                     {message.documents && (
                       <div className="mt-2 text-xs opacity-75">
                         📋 Analyzed: {message.documents.map(d => d.name).join(', ')}
@@ -537,19 +655,81 @@ Could you be more specific about what aspect of their care you'd like me to anal
               )}
             </div>
 
+            {/* Tagged Patients Display */}
+            {taggedPatients.length > 0 && (
+              <div className="px-4 py-2 border-t bg-gray-50">
+                <div className="flex items-center space-x-2 text-xs text-gray-600 mb-2">
+                  <span>Tagged patients:</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {taggedPatients.map((taggedPatient) => (
+                    <Badge
+                      key={taggedPatient.id}
+                      variant="outline"
+                      className="text-xs flex items-center space-x-1"
+                    >
+                      <span>{taggedPatient.name}</span>
+                      <button
+                        onClick={() => removeTaggedPatient(taggedPatient.id)}
+                        className="ml-1 hover:text-red-500"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Input */}
             <div className="border-t p-4">
-              <div className="flex space-x-2">
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Ask Dr. JEG about medications, analysis, or upload documents for review..."
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  disabled={isLoading}
-                />
+              <div className="flex space-x-2 relative">
+                <div className="flex-1 relative">
+                  <Textarea
+                    ref={inputRef}
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    placeholder="Ask Dr. JEG about medications, analysis, or use @ to tag patients for comparison..."
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    disabled={isLoading}
+                    className="min-h-[60px] resize-none"
+                  />
+                  
+                  {/* Patient Suggestions Popover */}
+                  {showPatientSuggestions && filteredPatients.length > 0 && (
+                    <div className="absolute bottom-full left-0 w-full mb-2 z-50">
+                      <Card className="shadow-lg">
+                        <CardContent className="p-2">
+                          <div className="space-y-1">
+                            {filteredPatients.slice(0, 5).map((suggestionPatient) => (
+                              <button
+                                key={suggestionPatient.id}
+                                onClick={() => handlePatientSelect(suggestionPatient)}
+                                className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 text-sm"
+                              >
+                                <div className="font-medium">{suggestionPatient.name}</div>
+                                <div className="text-xs text-gray-500">
+                                  Age {suggestionPatient.age} • {suggestionPatient.status}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </div>
                 <Button onClick={handleSendMessage} disabled={isLoading || !inputMessage.trim()}>
                   <Send className="w-4 h-4" />
                 </Button>
+              </div>
+              <div className="text-xs text-gray-500 mt-2">
+                Use @ to tag patients for health metric comparison • Shift+Enter for new line
               </div>
             </div>
           </div>
