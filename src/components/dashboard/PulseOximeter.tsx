@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area } from "recharts";
-import { Activity, Droplets, TrendingUp, AlertCircle, Download } from "lucide-react";
+import { Activity, Droplets, TrendingUp, AlertCircle, Download, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import jsPDF from 'jspdf';
 
 interface PulseOximeterProps {
@@ -193,20 +195,26 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Pulse Oximeter Data</CardTitle>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => downloadOximeterData('json')}>
-                <Download className="w-4 h-4 mr-1" />
-                JSON
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadOximeterData('csv')}>
-                <Download className="w-4 h-4 mr-1" />
-                CSV
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadOximeterData('pdf')}>
-                <Download className="w-4 h-4 mr-1" />
-                PDF
-              </Button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-1" />
+                  Download
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => downloadOximeterData('json')}>
+                  JSON Format
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => downloadOximeterData('csv')}>
+                  CSV Format
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => downloadOximeterData('pdf')}>
+                  PDF Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
       </Card>

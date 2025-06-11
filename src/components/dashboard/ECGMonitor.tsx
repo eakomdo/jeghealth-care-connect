@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChartContainer } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { Heart, Play, Pause, Download, AlertTriangle } from "lucide-react";
+import { Heart, Play, Pause, Download, AlertTriangle, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import jsPDF from 'jspdf';
 
 interface ECGMonitorProps {
@@ -233,18 +235,26 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
               >
                 {isRecording ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadECGData('json')}>
-                <Download className="w-4 h-4 mr-1" />
-                JSON
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadECGData('csv')}>
-                <Download className="w-4 h-4 mr-1" />
-                CSV
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadECGData('pdf')}>
-                <Download className="w-4 h-4 mr-1" />
-                PDF
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="w-4 h-4 mr-1" />
+                    Download
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => downloadECGData('json')}>
+                    JSON Format
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => downloadECGData('csv')}>
+                    CSV Format
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => downloadECGData('pdf')}>
+                    PDF Report
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardHeader>

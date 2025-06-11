@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { Heart, Activity, MapPin, TrendingUp, Download } from "lucide-react";
+import { Heart, Activity, MapPin, TrendingUp, Download, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import jsPDF from 'jspdf';
 
 interface HealthMetricsProps {
@@ -220,20 +221,26 @@ const HealthMetrics = ({ patientId }: HealthMetricsProps) => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Health Metrics Overview</CardTitle>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => downloadHealthData('json')}>
-                <Download className="w-4 h-4 mr-1" />
-                JSON
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadHealthData('csv')}>
-                <Download className="w-4 h-4 mr-1" />
-                CSV
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadHealthData('pdf')}>
-                <Download className="w-4 h-4 mr-1" />
-                PDF
-              </Button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-1" />
+                  Download
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => downloadHealthData('json')}>
+                  JSON Format
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => downloadHealthData('csv')}>
+                  CSV Format
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => downloadHealthData('pdf')}>
+                  PDF Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
       </Card>
