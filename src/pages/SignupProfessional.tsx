@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Shield, CheckCircle, Stethoscope, Heart } from "lucide-react";
+import LicenseVerification from "@/components/LicenseVerification";
 
 const SignupProfessional = () => {
   const [formData, setFormData] = useState({
@@ -19,15 +20,29 @@ const SignupProfessional = () => {
     message: ""
   });
 
+  const [licenseDocument, setLicenseDocument] = useState<File | null>(null);
+  const [isLicenseVerified, setIsLicenseVerified] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Professional signup request:", formData);
+    console.log("Professional signup request:", {
+      ...formData,
+      licenseDocument: licenseDocument?.name,
+      isLicenseVerified
+    });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
+    });
+  };
+
+  const handleLicenseNumberChange = (value: string) => {
+    setFormData({
+      ...formData,
+      licenseNumber: value
     });
   };
 
@@ -195,20 +210,15 @@ const SignupProfessional = () => {
                     <option value="other">Other</option>
                   </select>
                 </div>
-                <div>
-                  <Label htmlFor="licenseNumber" className="text-sm font-medium text-gray-700">
-                    License Number
-                  </Label>
-                  <Input
-                    id="licenseNumber"
-                    name="licenseNumber"
-                    value={formData.licenseNumber}
-                    onChange={handleInputChange}
-                    className="mt-1"
-                    placeholder="Professional license number"
-                  />
-                </div>
               </div>
+
+              {/* License Verification Component */}
+              <LicenseVerification
+                licenseNumber={formData.licenseNumber}
+                onLicenseNumberChange={handleLicenseNumberChange}
+                onDocumentUpload={setLicenseDocument}
+                onVerificationComplete={setIsLicenseVerified}
+              />
 
               <div>
                 <Label htmlFor="message" className="text-sm font-medium text-gray-700">
