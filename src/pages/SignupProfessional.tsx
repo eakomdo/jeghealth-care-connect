@@ -1,13 +1,18 @@
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Shield, CheckCircle, Stethoscope, Heart } from "lucide-react";
+import { Shield, CheckCircle, Stethoscope, Heart, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import LicenseVerification from "@/components/LicenseVerification";
 
 const SignupProfessional = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const [formData, setFormData] = useState({
     title: "",
     firstName: "",
@@ -22,14 +27,68 @@ const SignupProfessional = () => {
 
   const [licenseDocument, setLicenseDocument] = useState<File | null>(null);
   const [isLicenseVerified, setIsLicenseVerified] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Professional signup request:", {
-      ...formData,
-      licenseDocument: licenseDocument?.name,
-      isLicenseVerified
-    });
+    
+    if (!isLicenseVerified) {
+      toast({
+        title: "License Verification Required",
+        description: "Please verify your professional license before submitting the request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Store user data in localStorage for demo purposes
+      const userData = {
+        title: formData.title,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        organization: formData.organization,
+        role: formData.role,
+        licenseNumber: formData.licenseNumber,
+        message: formData.message,
+        licenseDocument: licenseDocument?.name,
+        isLicenseVerified,
+        signupDate: new Date().toISOString(),
+        userType: 'professional'
+      };
+
+      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem('userType', 'professional');
+
+      console.log("Professional signup request:", userData);
+
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      toast({
+        title: "Access Request Approved!",
+        description: "Your professional credentials have been verified. Redirecting to dashboard...",
+      });
+
+      // Redirect to dashboard after short delay
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+
+    } catch (error) {
+      toast({
+        title: "Submission Failed",
+        description: "There was an error processing your request. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Signup error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -220,6 +279,29 @@ const SignupProfessional = () => {
                 onVerificationComplete={setIsLicenseVerified}
               />
 
+              {/* License Status Alert */}
+              {formData.licenseNumber && !isLicenseVerified && (
+                <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-orange-600" />
+                    <p className="text-sm text-orange-800">
+                      Please verify your license number before submitting the access request.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {isLicenseVerified && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <p className="text-sm text-green-800">
+                      License successfully verified! You can now submit your access request.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="message" className="text-sm font-medium text-gray-700">
                   Additional Information
@@ -237,9 +319,19 @@ const SignupProfessional = () => {
 
               <Button 
                 type="submit" 
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium"
+                disabled={!isLicenseVerified || isSubmitting}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Access Request
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing Request...
+                  </div>
+                ) : isLicenseVerified ? (
+                  "Submit Access Request"
+                ) : (
+                  "Verify License to Continue"
+                )}
               </Button>
             </form>
 
@@ -263,19 +355,19 @@ const SignupProfessional = () => {
                   <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-semibold mr-3 mt-0.5">
                     1
                   </div>
-                  <p>We'll review your application within 24-48 hours</p>
+                  <p>Your license is verified automatically using our international database</p>
                 </div>
                 <div className="flex items-start">
                   <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-semibold mr-3 mt-0.5">
                     2
                   </div>
-                  <p>Our team will verify your credentials and organization</p>
+                  <p>Immediate access is granted for verified healthcare professionals</p>
                 </div>
                 <div className="flex items-start">
                   <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-semibold mr-3 mt-0.5">
                     3
                   </div>
-                  <p>You'll receive login credentials and onboarding materials</p>
+                  <p>You'll be redirected to your personalized dashboard</p>
                 </div>
               </div>
             </div>
