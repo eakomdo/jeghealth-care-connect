@@ -18,7 +18,7 @@ const Dashboard = () => {
     name: "John Doe",
     age: 72,
     careCode: "JD2024001",
-    status: "stable",
+    status: "stable" as const,
     lastReading: "2 minutes ago"
   });
 
