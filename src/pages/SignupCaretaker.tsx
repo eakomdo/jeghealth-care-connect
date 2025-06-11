@@ -1,13 +1,16 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Shield, User, Heart, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const SignupCaretaker = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -20,9 +23,47 @@ const SignupCaretaker = () => {
     additionalInfo: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
     console.log("Caretaker signup request:", formData);
+    
+    // Demo validation - check if required fields are filled
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.careCode || !formData.relationship) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields marked with *",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Demo code - simulate API call
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+      
+      // Demo success response
+      toast({
+        title: "Registration Successful!",
+        description: "Welcome to JEGHealth! You can now access the patient dashboard.",
+      });
+      
+      // Redirect to dashboard after successful registration
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+      
+    } catch (error) {
+      toast({
+        title: "Registration Failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -231,8 +272,9 @@ const SignupCaretaker = () => {
               <Button 
                 type="submit" 
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium"
+                disabled={isSubmitting}
               >
-                Register as Caretaker
+                {isSubmitting ? "Registering..." : "Register as Caretaker"}
               </Button>
             </form>
 
