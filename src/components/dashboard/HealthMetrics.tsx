@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { Heart, Activity, MapPin, TrendingUp } from "lucide-react";
+import { Heart, Activity, MapPin, TrendingUp, Download } from "lucide-react";
 
 interface HealthMetricsProps {
   patientId: number;
@@ -56,8 +56,147 @@ const HealthMetrics = ({ patientId }: HealthMetricsProps) => {
     },
   };
 
+  const downloadHealthData = (format: 'pdf' | 'csv' | 'json') => {
+    const patientData = {
+      patientId,
+      timestamp: new Date().toISOString(),
+      currentMetrics: {
+        heartRate: 78,
+        spO2: 98,
+        activity: 1250,
+        location: 'Home'
+      },
+      heartRateData,
+      oxygenData,
+      movementData
+    };
+
+    switch (format) {
+      case 'json':
+        downloadJSON(patientData);
+        break;
+      case 'csv':
+        downloadCSV(patientData);
+        break;
+      case 'pdf':
+        downloadPDF(patientData);
+        break;
+    }
+  };
+
+  const downloadJSON = (data: any) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-health-metrics-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadCSV = (data: any) => {
+    let csvContent = 'Type,Time,Value,Unit\n';
+    
+    data.heartRateData.forEach((item: any) => {
+      csvContent += `Heart Rate,${item.time},${item.value},bpm\n`;
+    });
+    
+    data.oxygenData.forEach((item: any) => {
+      csvContent += `Oxygen Saturation,${item.time},${item.value},%\n`;
+    });
+    
+    data.movementData.forEach((item: any) => {
+      csvContent += `Movement,${item.time},${item.steps},steps\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-health-metrics-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadPDF = (data: any) => {
+    // Simple HTML to PDF conversion (for demo purposes)
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Health Metrics Report - Patient ${patientId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #333; }
+            table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h1>Health Metrics Report</h1>
+          <p>Patient ID: ${patientId}</p>
+          <p>Report Generated: ${new Date().toLocaleDateString()}</p>
+          
+          <h2>Current Metrics</h2>
+          <table>
+            <tr><th>Metric</th><th>Value</th><th>Status</th></tr>
+            <tr><td>Heart Rate</td><td>${data.currentMetrics.heartRate} bpm</td><td>Normal</td></tr>
+            <tr><td>Oxygen Saturation</td><td>${data.currentMetrics.spO2}%</td><td>Normal</td></tr>
+            <tr><td>Daily Steps</td><td>${data.currentMetrics.activity}</td><td>Active</td></tr>
+            <tr><td>Location</td><td>${data.currentMetrics.location}</td><td>Safe</td></tr>
+          </table>
+          
+          <h2>24-Hour Heart Rate Data</h2>
+          <table>
+            <tr><th>Time</th><th>Heart Rate (bpm)</th></tr>
+            ${data.heartRateData.map((item: any) => `<tr><td>${item.time}</td><td>${item.value}</td></tr>`).join('')}
+          </table>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-health-metrics-${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log('HTML report downloaded. For PDF conversion, you can print this HTML file as PDF from your browser.');
+  };
+
   return (
     <div className="space-y-6">
+      {/* Download Controls */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Health Metrics Overview</CardTitle>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" onClick={() => downloadHealthData('json')}>
+                <Download className="w-4 h-4 mr-1" />
+                JSON
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => downloadHealthData('csv')}>
+                <Download className="w-4 h-4 mr-1" />
+                CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => downloadHealthData('pdf')}>
+                <Download className="w-4 h-4 mr-1" />
+                Report
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>

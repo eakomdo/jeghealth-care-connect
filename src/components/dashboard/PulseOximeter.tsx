@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area } from "recharts";
-import { Activity, Droplets, TrendingUp, AlertCircle } from "lucide-react";
+import { Activity, Droplets, TrendingUp, AlertCircle, Download } from "lucide-react";
 
 interface PulseOximeterProps {
   patientId: number;
@@ -36,8 +36,162 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
     },
   };
 
+  const downloadOximeterData = (format: 'json' | 'csv' | 'report') => {
+    const oximeterData = {
+      patientId,
+      timestamp: new Date().toISOString(),
+      deviceInfo: {
+        model: 'MAX30102 Sensor',
+        status: 'Connected',
+        signalQuality: 'Excellent',
+        batteryLevel: '75%',
+        lastSync: '2 minutes ago'
+      },
+      currentReadings: {
+        spo2: 98,
+        pulseRate: 78,
+        trend: 'Stable'
+      },
+      trendData: oxygenTrendData
+    };
+
+    switch (format) {
+      case 'json':
+        downloadJSON(oximeterData);
+        break;
+      case 'csv':
+        downloadCSV(oximeterData);
+        break;
+      case 'report':
+        downloadReport(oximeterData);
+        break;
+    }
+  };
+
+  const downloadJSON = (data: any) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-pulse-oximeter-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadCSV = (data: any) => {
+    let csvContent = 'Time,SpO2 (%),Heart Rate (BPM)\n';
+    
+    data.trendData.forEach((item: any) => {
+      csvContent += `${item.time},${item.spo2},${item.heartRate}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-pulse-oximeter-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadReport = (data: any) => {
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Pulse Oximeter Report - Patient ${patientId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #333; }
+            .metrics { display: flex; gap: 20px; margin: 20px 0; }
+            .metric-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+            table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h1>Pulse Oximeter Report</h1>
+          <p>Patient ID: ${patientId}</p>
+          <p>Report Generated: ${new Date().toLocaleDateString()}</p>
+          
+          <h2>Current Readings</h2>
+          <div class="metrics">
+            <div class="metric-card">
+              <h3>SpO2</h3>
+              <p>${data.currentReadings.spo2}%</p>
+              <small>Normal Range</small>
+            </div>
+            <div class="metric-card">
+              <h3>Pulse Rate</h3>
+              <p>${data.currentReadings.pulseRate} BPM</p>
+              <small>Normal</small>
+            </div>
+            <div class="metric-card">
+              <h3>Trend</h3>
+              <p>${data.currentReadings.trend}</p>
+              <small>Last 4 hours</small>
+            </div>
+          </div>
+          
+          <h2>Device Information</h2>
+          <table>
+            <tr><th>Parameter</th><th>Value</th></tr>
+            <tr><td>Device Model</td><td>${data.deviceInfo.model}</td></tr>
+            <tr><td>Connection Status</td><td>${data.deviceInfo.status}</td></tr>
+            <tr><td>Signal Quality</td><td>${data.deviceInfo.signalQuality}</td></tr>
+            <tr><td>Battery Level</td><td>${data.deviceInfo.batteryLevel}</td></tr>
+            <tr><td>Last Sync</td><td>${data.deviceInfo.lastSync}</td></tr>
+          </table>
+          
+          <h2>24-Hour Trend Data</h2>
+          <table>
+            <tr><th>Time</th><th>SpO2 (%)</th><th>Heart Rate (BPM)</th></tr>
+            ${data.trendData.map((item: any) => `<tr><td>${item.time}</td><td>${item.spo2}</td><td>${item.heartRate}</td></tr>`).join('')}
+          </table>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-pulse-oximeter-report-${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Download Controls */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Pulse Oximeter Data</CardTitle>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" onClick={() => downloadOximeterData('json')}>
+                <Download className="w-4 h-4 mr-1" />
+                JSON
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => downloadOximeterData('csv')}>
+                <Download className="w-4 h-4 mr-1" />
+                CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => downloadOximeterData('report')}>
+                <Download className="w-4 h-4 mr-1" />
+                Report
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
       {/* Current Readings */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>

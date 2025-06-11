@@ -52,6 +52,150 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
     },
   };
 
+  const downloadECGData = (format: 'json' | 'csv' | 'report') => {
+    const ecgAnalysis = {
+      patientId,
+      timestamp: new Date().toISOString(),
+      recordingDuration: ecgData.length * 0.1, // seconds
+      analysis: {
+        heartRate: currentHeartRate,
+        rhythm: rhythmStatus,
+        heartRateVariability: '32ms',
+        qtInterval: '420ms',
+        lastAnalysis: lastAnalysis
+      },
+      rawData: ecgData,
+      alerts: [
+        {
+          type: 'monitoring',
+          message: 'Patient shows occasional premature ventricular contractions (PVCs)',
+          frequency: '2-3 per hour',
+          severity: 'low'
+        }
+      ]
+    };
+
+    switch (format) {
+      case 'json':
+        downloadJSON(ecgAnalysis);
+        break;
+      case 'csv':
+        downloadCSV(ecgAnalysis);
+        break;
+      case 'report':
+        downloadReport(ecgAnalysis);
+        break;
+    }
+  };
+
+  const downloadJSON = (data: any) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-ecg-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadCSV = (data: any) => {
+    let csvContent = 'Time (ms),ECG Value (mV)\n';
+    
+    data.rawData.forEach((item: any) => {
+      csvContent += `${item.time * 100},${item.value}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-ecg-raw-data-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadReport = (data: any) => {
+    const htmlContent = `
+      <html>
+        <head>
+          <title>ECG Analysis Report - Patient ${patientId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #333; }
+            .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+            .analysis-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+            .alert-box { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0; }
+            table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h1>ECG Analysis Report</h1>
+          <p>Patient ID: ${patientId}</p>
+          <p>Report Generated: ${new Date().toLocaleDateString()}</p>
+          <p>Recording Duration: ${data.recordingDuration.toFixed(1)} seconds</p>
+          
+          <h2>ECG Analysis</h2>
+          <div class="analysis-grid">
+            <div class="analysis-card">
+              <h3>Heart Rate</h3>
+              <p style="font-size: 24px; color: #e74c3c;">${data.analysis.heartRate} BPM</p>
+              <small>Normal range</small>
+            </div>
+            <div class="analysis-card">
+              <h3>Rhythm</h3>
+              <p style="font-size: 18px; color: #27ae60;">${data.analysis.rhythm}</p>
+              <small>Regular pattern detected</small>
+            </div>
+            <div class="analysis-card">
+              <h3>Heart Rate Variability</h3>
+              <p style="font-size: 18px; color: #3498db;">${data.analysis.heartRateVariability}</p>
+              <small>RMSSD - Normal</small>
+            </div>
+            <div class="analysis-card">
+              <h3>QT Interval</h3>
+              <p style="font-size: 18px; color: #27ae60;">${data.analysis.qtInterval}</p>
+              <small>Within normal range</small>
+            </div>
+          </div>
+          
+          <h2>Clinical Notes</h2>
+          ${data.alerts.map((alert: any) => `
+            <div class="alert-box">
+              <strong>${alert.type.toUpperCase()}:</strong> ${alert.message}
+              <br><small>Frequency: ${alert.frequency} | Severity: ${alert.severity}</small>
+            </div>
+          `).join('')}
+          
+          <h2>Recommendations</h2>
+          <ul>
+            <li>Continue routine monitoring</li>
+            <li>Follow up on PVC frequency in next assessment</li>
+            <li>Maintain current medication regimen</li>
+            <li>Schedule cardiology consultation if PVC frequency increases</li>
+          </ul>
+          
+          <p><small>Last Analysis: ${data.analysis.lastAnalysis}</small></p>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-${patientId}-ecg-report-${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       {/* ECG Controls */}
@@ -73,8 +217,17 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
               >
                 {isRecording ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </Button>
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4" />
+              <Button variant="outline" size="sm" onClick={() => downloadECGData('json')}>
+                <Download className="w-4 h-4 mr-1" />
+                JSON
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => downloadECGData('csv')}>
+                <Download className="w-4 h-4 mr-1" />
+                CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => downloadECGData('report')}>
+                <Download className="w-4 h-4 mr-1" />
+                Report
               </Button>
             </div>
           </div>
