@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, Activity, User, MapPin, AlertTriangle, TrendingUp } from "lucide-react";
+import { Heart, Activity, User, MapPin, AlertTriangle, TrendingUp, Brain } from "lucide-react";
 import PatientList from "@/components/dashboard/PatientList";
 import HealthMetrics from "@/components/dashboard/HealthMetrics";
 import ECGMonitor from "@/components/dashboard/ECGMonitor";
@@ -14,6 +13,7 @@ import MovementTracker from "@/components/dashboard/MovementTracker";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
 import AddPatientDialog from "@/components/dashboard/AddPatientDialog";
+import DrJegAssistant from "@/components/dashboard/DrJegAssistant";
 
 type PatientStatus = "stable" | "warning" | "critical" | "pending";
 
@@ -243,12 +243,16 @@ const Dashboard = () => {
               <>
                 {/* Tabs for different views */}
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-5">
+                  <TabsList className="grid w-full grid-cols-6">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="ecg">ECG</TabsTrigger>
                     <TabsTrigger value="vitals">Vitals</TabsTrigger>
                     <TabsTrigger value="movement">Movement</TabsTrigger>
                     <TabsTrigger value="alerts">Alerts</TabsTrigger>
+                    <TabsTrigger value="ai-assistant">
+                      <Brain className="w-4 h-4 mr-1" />
+                      Dr. JEG
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="overview" className="space-y-6">
@@ -269,6 +273,10 @@ const Dashboard = () => {
 
                   <TabsContent value="alerts" className="space-y-6">
                     <AlertsPanel patientId={selectedPatient.id} />
+                  </TabsContent>
+
+                  <TabsContent value="ai-assistant" className="space-y-6">
+                    <DrJegAssistant patient={selectedPatient} />
                   </TabsContent>
                 </Tabs>
               </>
