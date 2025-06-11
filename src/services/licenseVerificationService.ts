@@ -1,4 +1,3 @@
-
 interface LicenseVerificationRequest {
   licenseNumber: string;
   professionalType?: string;
@@ -94,14 +93,17 @@ export class LicenseVerificationService {
   }
 
   async verifyLicense(request: LicenseVerificationRequest): Promise<LicenseVerificationResponse> {
+    console.log('Verifying license:', request.licenseNumber);
+    
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     const verificationId = this.generateVerificationId();
     const timestamp = new Date().toISOString();
 
     // Basic validation
-    if (!request.licenseNumber || request.licenseNumber.length < 3) {
+    if (!request.licenseNumber || request.licenseNumber.trim().length < 3) {
+      console.log('License validation failed: too short');
       return {
         isValid: false,
         status: 'invalid',
@@ -111,12 +113,15 @@ export class LicenseVerificationService {
       };
     }
 
-    // Search in mock database
+    // Search in mock database - exact match including case
     const licenseRecord = mockLicenseDatabase.find(
-      record => record.licenseNumber.toLowerCase() === request.licenseNumber.toLowerCase()
+      record => record.licenseNumber === request.licenseNumber.trim()
     );
 
+    console.log('License record found:', licenseRecord);
+
     if (!licenseRecord) {
+      console.log('License not found in database');
       return {
         isValid: false,
         status: 'not_found',
@@ -131,6 +136,7 @@ export class LicenseVerificationService {
     const currentDate = new Date();
     
     if (licenseRecord.status === 'expired' || expiryDate < currentDate) {
+      console.log('License is expired');
       return {
         isValid: false,
         status: 'expired',
@@ -151,6 +157,7 @@ export class LicenseVerificationService {
     }
 
     // Valid license
+    console.log('License verification successful');
     return {
       isValid: true,
       status: 'verified',
@@ -241,6 +248,7 @@ export class LicenseVerificationService {
   private getRandomRestrictions(): string[] {
     const possibleRestrictions = [
       'Must practice under supervision',
+      'Limited to outpatient care only',
       'Limited to outpatient care only',
       'Continuing education required',
       'Regular peer review mandatory'

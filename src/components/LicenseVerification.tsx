@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +60,7 @@ const LicenseVerification = ({
       return;
     }
 
+    console.log('Starting license verification for:', licenseNumber);
     setVerificationStatus('verifying');
     setVerificationMessage('Verifying license with international databases...');
     setVerificationDetails(null);
@@ -70,12 +70,14 @@ const LicenseVerification = ({
         licenseNumber: licenseNumber.trim()
       });
 
+      console.log('Verification result:', result);
       setVerificationId(result.verificationId);
       setVerificationMessage(result.message);
       
-      if (result.isValid) {
+      if (result.isValid && result.status === 'verified') {
         setVerificationStatus('verified');
         setVerificationDetails(result.licenseDetails);
+        console.log('Calling onVerificationComplete(true)');
         onVerificationComplete(true);
       } else {
         switch (result.status) {
@@ -89,13 +91,14 @@ const LicenseVerification = ({
           default:
             setVerificationStatus('failed');
         }
+        console.log('Calling onVerificationComplete(false)');
         onVerificationComplete(false);
       }
     } catch (error) {
+      console.error('License verification error:', error);
       setVerificationStatus('failed');
       setVerificationMessage('Verification service temporarily unavailable. Please try again later.');
       onVerificationComplete(false);
-      console.error('License verification error:', error);
     }
   };
 
@@ -163,18 +166,22 @@ const LicenseVerification = ({
 
           {/* Test License Numbers for Demo */}
           <div className="p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm font-medium text-blue-900 mb-2">Demo License Numbers (for testing):</p>
+            <p className="text-sm font-medium text-blue-900 mb-2">Demo License Numbers (click to use):</p>
             <div className="flex flex-wrap gap-2">
-              {testLicenses.slice(0, 3).map((license) => (
+              {testLicenses.slice(0, 4).map((license) => (
                 <button
                   key={license}
-                  onClick={() => onLicenseNumberChange(license)}
-                  className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                  onClick={() => {
+                    console.log('Clicked demo license:', license);
+                    onLicenseNumberChange(license);
+                  }}
+                  className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                 >
                   {license}
                 </button>
               ))}
             </div>
+            <p className="text-xs text-blue-600 mt-1">Note: EXPIRED123 will show as expired for testing</p>
           </div>
 
           {/* License Number Input */}
