@@ -45,14 +45,14 @@ const Hero = () => {
               <span className="font-medium">Real-time Monitoring</span>
             </div>
             <div className="flex items-center gap-3 text-gray-700">
-              <div className="p-3 bg-green-100 rounded-full">
-                <Shield className="w-6 h-6 text-green-600" />
+              <div className="p-3 bg-teal-100 rounded-full">
+                <Shield className="w-6 h-6 text-teal-600" />
               </div>
               <span className="font-medium">HIPAA Compliant</span>
             </div>
             <div className="flex items-center gap-3 text-gray-700">
-              <div className="p-3 bg-purple-100 rounded-full">
-                <Users className="w-6 h-6 text-purple-600" />
+              <div className="p-3 bg-teal-100 rounded-full">
+                <Users className="w-6 h-6 text-teal-600" />
               </div>
               <span className="font-medium">Multi-Patient Dashboard</span>
             </div>
