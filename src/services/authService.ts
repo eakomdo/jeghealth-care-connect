@@ -10,6 +10,7 @@ interface UserAccount {
   relationship?: string;
   licenseNumber?: string;
   phone?: string;
+  password?: string; // Added password field
   createdAt: string;
   isActive: boolean;
 }
@@ -38,6 +39,16 @@ export class AuthService {
   async createAccount(userData: any): Promise<UserAccount> {
     console.log('Creating account for:', userData.email);
     
+    // Check if user already exists
+    const accounts = this.getAccounts();
+    const existingUser = accounts.find(account => 
+      account.email.toLowerCase() === userData.email.toLowerCase()
+    );
+    
+    if (existingUser) {
+      throw new Error('An account with this email already exists');
+    }
+    
     // Create user account
     const userAccount: UserAccount = {
       id: this.generateUserId(),
@@ -50,12 +61,12 @@ export class AuthService {
       relationship: userData.relationship,
       licenseNumber: userData.licenseNumber,
       phone: userData.phone,
+      password: userData.password, // Store password (in production, this should be hashed)
       createdAt: new Date().toISOString(),
       isActive: true
     };
 
     // Store in accounts database
-    const accounts = this.getAccounts();
     accounts.push(userAccount);
     localStorage.setItem('userAccounts', JSON.stringify(accounts));
     
@@ -87,8 +98,13 @@ export class AuthService {
       };
     }
     
-    // For demo purposes, any password works for existing accounts
-    // In production, you'd verify the actual password hash
+    // Check password (in production, compare with hashed password)
+    if (user.password && user.password !== credentials.password) {
+      return {
+        success: false,
+        message: 'Incorrect password. Please try again.'
+      };
+    }
     
     // Set current user
     localStorage.setItem('currentUser', JSON.stringify(user));

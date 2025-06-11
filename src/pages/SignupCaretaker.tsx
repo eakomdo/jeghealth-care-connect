@@ -4,18 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Shield, User, Heart, AlertCircle } from "lucide-react";
+import { Shield, User, Heart, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignupCaretaker = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     firstName: "",
     lastName: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     phone: "",
     careCode: "",
     relationship: "",
@@ -31,10 +35,31 @@ const SignupCaretaker = () => {
     console.log("Caretaker signup request:", formData);
     
     // Demo validation - check if required fields are filled
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.careCode || !formData.relationship) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone || !formData.careCode || !formData.relationship) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields marked with *",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Password validation
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
         variant: "destructive",
       });
       setIsSubmitting(false);
@@ -218,6 +243,66 @@ const SignupCaretaker = () => {
                     className="mt-1"
                     placeholder="+1 (555) 123-4567"
                   />
+                </div>
+              </div>
+
+              {/* Password Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                    Password *
+                  </Label>
+                  <div className="relative mt-1">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder="Minimum 8 characters"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                    Confirm Password *
+                  </Label>
+                  <div className="relative mt-1">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      placeholder="Re-enter password"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 

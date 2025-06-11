@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Shield, CheckCircle, Stethoscope, Heart, AlertCircle } from "lucide-react";
+import { Shield, CheckCircle, Stethoscope, Heart, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import LicenseVerification from "@/components/LicenseVerification";
 
@@ -17,6 +17,8 @@ const SignupProfessional = () => {
     firstName: "",
     lastName: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     phone: "",
     organization: "",
     role: "",
@@ -27,9 +29,39 @@ const SignupProfessional = () => {
   const [licenseDocument, setLicenseDocument] = useState<File | null>(null);
   const [isLicenseVerified, setIsLicenseVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Password validation
+    if (!formData.password || !formData.confirmPassword) {
+      toast({
+        title: "Password Required",
+        description: "Please enter and confirm your password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!isLicenseVerified) {
       toast({
@@ -226,6 +258,66 @@ const SignupProfessional = () => {
                     className="mt-1"
                     placeholder="+1 (555) 123-4567"
                   />
+                </div>
+              </div>
+
+              {/* Password Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                    Password *
+                  </Label>
+                  <div className="relative mt-1">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder="Minimum 8 characters"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                    Confirm Password *
+                  </Label>
+                  <div className="relative mt-1">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      placeholder="Re-enter password"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
