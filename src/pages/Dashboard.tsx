@@ -12,13 +12,24 @@ import PulseOximeter from "@/components/dashboard/PulseOximeter";
 import MovementTracker from "@/components/dashboard/MovementTracker";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
 
+type PatientStatus = "stable" | "warning" | "critical";
+
+interface Patient {
+  id: number;
+  name: string;
+  age: number;
+  careCode: string;
+  status: PatientStatus;
+  lastReading: string;
+}
+
 const Dashboard = () => {
-  const [selectedPatient, setSelectedPatient] = useState({
+  const [selectedPatient, setSelectedPatient] = useState<Patient>({
     id: 1,
     name: "John Doe",
     age: 72,
     careCode: "JD2024001",
-    status: "stable" as const,
+    status: "stable",
     lastReading: "2 minutes ago"
   });
 
