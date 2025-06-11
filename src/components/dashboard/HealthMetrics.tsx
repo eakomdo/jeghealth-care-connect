@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,9 +9,10 @@ import jsPDF from 'jspdf';
 
 interface HealthMetricsProps {
   patientId: number;
+  patientName?: string;
 }
 
-const HealthMetrics = ({ patientId }: HealthMetricsProps) => {
+const HealthMetrics = ({ patientId, patientName }: HealthMetricsProps) => {
   // Sample data for the last 24 hours
   const heartRateData = [
     { time: '00:00', value: 72 },
@@ -62,6 +62,7 @@ const HealthMetrics = ({ patientId }: HealthMetricsProps) => {
   const downloadHealthData = (format: 'pdf' | 'csv' | 'json') => {
     const patientData = {
       patientId,
+      patientName: patientName || 'Unknown Patient',
       timestamp: new Date().toISOString(),
       currentMetrics: {
         heartRate: 78,
@@ -137,6 +138,8 @@ const HealthMetrics = ({ patientId }: HealthMetricsProps) => {
     yPosition += 15;
 
     pdf.setFontSize(12);
+    pdf.text(`Patient: ${data.patientName}`, margin, yPosition);
+    yPosition += 8;
     pdf.text(`Patient ID: ${patientId}`, margin, yPosition);
     yPosition += 8;
     pdf.text(`Report Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
@@ -352,3 +355,5 @@ const HealthMetrics = ({ patientId }: HealthMetricsProps) => {
 };
 
 export default HealthMetrics;
+
+}

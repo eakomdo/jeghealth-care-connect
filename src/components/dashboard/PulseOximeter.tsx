@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,9 +9,10 @@ import jsPDF from 'jspdf';
 
 interface PulseOximeterProps {
   patientId: number;
+  patientName?: string;
 }
 
-const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
+const PulseOximeter = ({ patientId, patientName }: PulseOximeterProps) => {
   const oxygenTrendData = [
     { time: '00:00', spo2: 98, heartRate: 72 },
     { time: '02:00', spo2: 97, heartRate: 70 },
@@ -42,6 +42,7 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
   const downloadOximeterData = (format: 'json' | 'csv' | 'pdf') => {
     const oximeterData = {
       patientId,
+      patientName: patientName || 'Unknown Patient',
       timestamp: new Date().toISOString(),
       deviceInfo: {
         model: 'MAX30102 Sensor',
@@ -76,7 +77,7 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `patient-${patientId}-pulse-oximeter-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `patient-${data.patientId}-pulse-oximeter-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -94,7 +95,7 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `patient-${patientId}-pulse-oximeter-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `patient-${data.patientId}-pulse-oximeter-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -113,7 +114,9 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
     yPosition += 15;
 
     pdf.setFontSize(12);
-    pdf.text(`Patient ID: ${patientId}`, margin, yPosition);
+    pdf.text(`Patient: ${data.patientName}`, margin, yPosition);
+    yPosition += 8;
+    pdf.text(`Patient ID: ${data.patientId}`, margin, yPosition);
     yPosition += 8;
     pdf.text(`Report Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
     yPosition += 20;
@@ -185,7 +188,7 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
       yPosition += 6;
     });
 
-    pdf.save(`patient-${patientId}-pulse-oximeter-report-${new Date().toISOString().split('T')[0]}.pdf`);
+    pdf.save(`patient-${data.patientId}-pulse-oximeter-report-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   return (

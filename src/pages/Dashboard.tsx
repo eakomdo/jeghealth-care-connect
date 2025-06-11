@@ -256,15 +256,15 @@ const Dashboard = () => {
                   </TabsList>
 
                   <TabsContent value="overview" className="space-y-6">
-                    <HealthMetrics patientId={selectedPatient.id} />
+                    <HealthMetrics patientId={selectedPatient.id} patientName={selectedPatient.name} />
                   </TabsContent>
 
                   <TabsContent value="ecg" className="space-y-6">
-                    <ECGMonitor patientId={selectedPatient.id} />
+                    <ECGMonitor patientId={selectedPatient.id} patientName={selectedPatient.name} />
                   </TabsContent>
 
                   <TabsContent value="vitals" className="space-y-6">
-                    <PulseOximeter patientId={selectedPatient.id} />
+                    <PulseOximeter patientId={selectedPatient.id} patientName={selectedPatient.name} />
                   </TabsContent>
 
                   <TabsContent value="movement" className="space-y-6">

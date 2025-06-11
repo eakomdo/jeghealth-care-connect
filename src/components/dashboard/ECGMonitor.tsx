@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,9 +10,10 @@ import jsPDF from 'jspdf';
 
 interface ECGMonitorProps {
   patientId: number;
+  patientName?: string;
 }
 
-const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
+const ECGMonitor = ({ patientId, patientName }: ECGMonitorProps) => {
   const [isRecording, setIsRecording] = useState(true);
   const [ecgData, setEcgData] = useState<Array<{ time: number; value: number }>>([]);
 
@@ -58,6 +58,7 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
   const downloadECGData = (format: 'json' | 'csv' | 'pdf') => {
     const ecgAnalysis = {
       patientId,
+      patientName: patientName || 'Unknown Patient',
       timestamp: new Date().toISOString(),
       recordingDuration: ecgData.length * 0.1, // seconds
       analysis: {
@@ -133,6 +134,8 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
     yPosition += 15;
 
     pdf.setFontSize(12);
+    pdf.text(`Patient: ${data.patientName}`, margin, yPosition);
+    yPosition += 8;
     pdf.text(`Patient ID: ${patientId}`, margin, yPosition);
     yPosition += 8;
     pdf.text(`Report Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
