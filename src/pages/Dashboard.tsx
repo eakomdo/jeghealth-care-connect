@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import AlertsPanel from "@/components/dashboard/AlertsPanel";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
 import AddPatientDialog from "@/components/dashboard/AddPatientDialog";
 
-type PatientStatus = "stable" | "warning" | "critical";
+type PatientStatus = "stable" | "warning" | "critical" | "pending";
 
 interface Patient {
   id: number;
@@ -23,6 +24,8 @@ interface Patient {
   careCode: string;
   status: PatientStatus;
   lastReading: string;
+  heartRate?: number;
+  oxygenLevel?: number;
 }
 
 interface UserData {
@@ -34,15 +37,50 @@ interface UserData {
 }
 
 const Dashboard = () => {
-  const [selectedPatient, setSelectedPatient] = useState<Patient>({
-    id: 1,
-    name: "John Doe",
-    age: 72,
-    careCode: "JD2024001",
-    status: "stable",
-    lastReading: "2 minutes ago"
-  });
+  const [patients, setPatients] = useState<Patient[]>([
+    {
+      id: 1,
+      name: "John Doe",
+      age: 72,
+      careCode: "JD2024001",
+      status: "stable",
+      lastReading: "2 minutes ago",
+      heartRate: 78,
+      oxygenLevel: 98
+    },
+    {
+      id: 2,
+      name: "Mary Smith",
+      age: 68,
+      careCode: "MS2024002",
+      status: "warning",
+      lastReading: "5 minutes ago",
+      heartRate: 95,
+      oxygenLevel: 94
+    },
+    {
+      id: 3,
+      name: "Robert Johnson",
+      age: 75,
+      careCode: "RJ2024003",
+      status: "stable",
+      lastReading: "1 minute ago",
+      heartRate: 82,
+      oxygenLevel: 97
+    },
+    {
+      id: 4,
+      name: "Linda Williams",
+      age: 70,
+      careCode: "LW2024004",
+      status: "critical",
+      lastReading: "30 seconds ago",
+      heartRate: 110,
+      oxygenLevel: 89
+    }
+  ]);
 
+  const [selectedPatient, setSelectedPatient] = useState<Patient>(patients[0]);
   const [activeTab, setActiveTab] = useState("overview");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -88,9 +126,25 @@ const Dashboard = () => {
   };
 
   const handleAddPatient = (newPatient: Patient) => {
-    console.log('New patient connected:', newPatient);
-    // In a real app, this would make an API call to connect the patient's monitoring device
-    // For now, we'll just log it and could update local state if needed
+    console.log('New patient connection request:', newPatient);
+    setPatients(prev => [...prev, newPatient]);
+    
+    // Simulate mobile app notification
+    console.log(`Confirmation sent to patient ${newPatient.name} at care code ${newPatient.careCode}`);
+  };
+
+  const handleApprovePatient = (patientId: number) => {
+    setPatients(prev => prev.map(patient => 
+      patient.id === patientId 
+        ? {
+            ...patient,
+            status: 'stable' as PatientStatus,
+            lastReading: 'Just connected',
+            heartRate: 75 + Math.floor(Math.random() * 20),
+            oxygenLevel: 95 + Math.floor(Math.random() * 5)
+          }
+        : patient
+    ));
   };
 
   return (
@@ -133,6 +187,8 @@ const Dashboard = () => {
             <PatientList 
               selectedPatient={selectedPatient}
               onSelectPatient={setSelectedPatient}
+              patients={patients}
+              onApprovePatient={handleApprovePatient}
             />
           </div>
 
@@ -168,36 +224,55 @@ const Dashboard = () => {
               </CardHeader>
             </Card>
 
-            {/* Tabs for different views */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="ecg">ECG</TabsTrigger>
-                <TabsTrigger value="vitals">Vitals</TabsTrigger>
-                <TabsTrigger value="movement">Movement</TabsTrigger>
-                <TabsTrigger value="alerts">Alerts</TabsTrigger>
-              </TabsList>
+            {/* Show message for pending patients */}
+            {selectedPatient.status === 'pending' ? (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                      Patient Approval Pending
+                    </h3>
+                    <p className="text-blue-700">
+                      {selectedPatient.name} needs to approve the connection request on their mobile app 
+                      before health monitoring can begin.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Tabs for different views */}
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="ecg">ECG</TabsTrigger>
+                    <TabsTrigger value="vitals">Vitals</TabsTrigger>
+                    <TabsTrigger value="movement">Movement</TabsTrigger>
+                    <TabsTrigger value="alerts">Alerts</TabsTrigger>
+                  </TabsList>
 
-              <TabsContent value="overview" className="space-y-6">
-                <HealthMetrics patientId={selectedPatient.id} />
-              </TabsContent>
+                  <TabsContent value="overview" className="space-y-6">
+                    <HealthMetrics patientId={selectedPatient.id} />
+                  </TabsContent>
 
-              <TabsContent value="ecg" className="space-y-6">
-                <ECGMonitor patientId={selectedPatient.id} />
-              </TabsContent>
+                  <TabsContent value="ecg" className="space-y-6">
+                    <ECGMonitor patientId={selectedPatient.id} />
+                  </TabsContent>
 
-              <TabsContent value="vitals" className="space-y-6">
-                <PulseOximeter patientId={selectedPatient.id} />
-              </TabsContent>
+                  <TabsContent value="vitals" className="space-y-6">
+                    <PulseOximeter patientId={selectedPatient.id} />
+                  </TabsContent>
 
-              <TabsContent value="movement" className="space-y-6">
-                <MovementTracker patientId={selectedPatient.id} />
-              </TabsContent>
+                  <TabsContent value="movement" className="space-y-6">
+                    <MovementTracker patientId={selectedPatient.id} />
+                  </TabsContent>
 
-              <TabsContent value="alerts" className="space-y-6">
-                <AlertsPanel patientId={selectedPatient.id} />
-              </TabsContent>
-            </Tabs>
+                  <TabsContent value="alerts" className="space-y-6">
+                    <AlertsPanel patientId={selectedPatient.id} />
+                  </TabsContent>
+                </Tabs>
+              </>
+            )}
           </div>
         </div>
       </div>

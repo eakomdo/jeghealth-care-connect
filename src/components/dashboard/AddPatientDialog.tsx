@@ -12,7 +12,7 @@ interface Patient {
   name: string;
   age: number;
   careCode: string;
-  status: 'stable' | 'warning' | 'critical';
+  status: 'stable' | 'warning' | 'critical' | 'pending';
   lastReading: string;
   heartRate?: number;
   oxygenLevel?: number;
@@ -70,25 +70,25 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
     setIsSubmitting(true);
 
     try {
-      // Simulate API call to verify the care code exists and is valid
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate API call to verify the care code exists and send confirmation to mobile app
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       const newPatient: Patient = {
         id: Date.now(), // Simple ID generation for demo
         name: `${formData.firstName} ${formData.lastName}`,
         age: age,
         careCode: formData.careCode.toUpperCase(),
-        status: formData.status,
-        lastReading: "Just connected",
-        heartRate: 75 + Math.floor(Math.random() * 20), // Random baseline
-        oxygenLevel: 95 + Math.floor(Math.random() * 5) // Random baseline
+        status: 'pending', // Set initial status as pending
+        lastReading: "Awaiting approval",
+        heartRate: undefined, // No data until approved
+        oxygenLevel: undefined // No data until approved
       };
 
       onAddPatient(newPatient);
       
       toast({
-        title: "Patient Connected",
-        description: `${newPatient.name} has been successfully connected with care code ${newPatient.careCode}.`,
+        title: "Connection Request Sent",
+        description: `A confirmation request has been sent to ${newPatient.name}'s mobile app. They will appear in your patient list once approved.`,
       });
 
       // Reset form
@@ -104,7 +104,7 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to connect patient. Please verify the care code is valid.",
+        description: "Failed to send connection request. Please verify the care code is valid.",
         variant: "destructive"
       });
     } finally {
@@ -178,24 +178,6 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
               disabled={isSubmitting}
             />
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="status">Initial Status</Label>
-            <Select 
-              value={formData.status} 
-              onValueChange={(value) => handleInputChange('status', value)}
-              disabled={isSubmitting}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="stable">Stable</SelectItem>
-                <SelectItem value="warning">Warning</SelectItem>
-                <SelectItem value="critical">Critical</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           <DialogFooter>
             <Button 
@@ -207,7 +189,7 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Connecting..." : "Connect Patient"}
+              {isSubmitting ? "Sending Request..." : "Send Connection Request"}
             </Button>
           </DialogFooter>
         </form>
