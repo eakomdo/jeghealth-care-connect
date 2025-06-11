@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Shield, CheckCircle, Stethoscope, Heart } from "lucide-react";
 
 const SignupProfessional = () => {
   const [formData, setFormData] = useState({
+    title: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -60,6 +60,39 @@ const SignupProfessional = () => {
           
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Professional Title */}
+              <div>
+                <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                  Professional Title *
+                </Label>
+                <select
+                  id="title"
+                  name="title"
+                  required
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                >
+                  <option value="">Select your title</option>
+                  <option value="Dr.">Dr. (Doctor)</option>
+                  <option value="Prof.">Prof. (Professor)</option>
+                  <option value="RN">RN (Registered Nurse)</option>
+                  <option value="LPN">LPN (Licensed Practical Nurse)</option>
+                  <option value="NP">NP (Nurse Practitioner)</option>
+                  <option value="PA">PA (Physician Assistant)</option>
+                  <option value="RPh">RPh (Pharmacist)</option>
+                  <option value="PT">PT (Physical Therapist)</option>
+                  <option value="OT">OT (Occupational Therapist)</option>
+                  <option value="RT">RT (Respiratory Therapist)</option>
+                  <option value="MT">MT (Medical Technologist)</option>
+                  <option value="RD">RD (Registered Dietitian)</option>
+                  <option value="MSW">MSW (Medical Social Worker)</option>
+                  <option value="Mr.">Mr.</option>
+                  <option value="Ms.">Ms.</option>
+                  <option value="Mrs.">Mrs.</option>
+                </select>
+              </div>
+
               {/* Personal Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

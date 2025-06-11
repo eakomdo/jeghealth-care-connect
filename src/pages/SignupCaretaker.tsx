@@ -12,6 +12,7 @@ const SignupCaretaker = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
+    title: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -43,6 +44,16 @@ const SignupCaretaker = () => {
     // Demo code - simulate API call
     try {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+      
+      // Store user data in localStorage for demo purposes
+      localStorage.setItem('userType', 'caretaker');
+      localStorage.setItem('userData', JSON.stringify({
+        title: formData.title,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        relationship: formData.relationship
+      }));
       
       // Demo success response
       toast({
@@ -115,8 +126,28 @@ const SignupCaretaker = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Personal Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Title and Personal Information */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                    Title
+                  </Label>
+                  <select
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="">Select title</option>
+                    <option value="Mr.">Mr.</option>
+                    <option value="Ms.">Ms.</option>
+                    <option value="Mrs.">Mrs.</option>
+                    <option value="Dr.">Dr.</option>
+                    <option value="Prof.">Prof.</option>
+                    <option value="Rev.">Rev.</option>
+                  </select>
+                </div>
                 <div>
                   <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
                     First Name *
@@ -147,6 +178,7 @@ const SignupCaretaker = () => {
                 </div>
               </div>
 
+              {/* Email Address */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="email" className="text-sm font-medium text-gray-700">

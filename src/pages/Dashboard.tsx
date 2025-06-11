@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +24,14 @@ interface Patient {
   lastReading: string;
 }
 
+interface UserData {
+  title?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  relationship?: string;
+}
+
 const Dashboard = () => {
   const [selectedPatient, setSelectedPatient] = useState<Patient>({
     id: 1,
@@ -37,6 +44,46 @@ const Dashboard = () => {
 
   const [activeTab, setActiveTab] = useState("overview");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userType, setUserType] = useState<string>('');
+
+  useEffect(() => {
+    // Load user data from localStorage (demo purposes)
+    const storedUserData = localStorage.getItem('userData');
+    const storedUserType = localStorage.getItem('userType');
+    
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    } else {
+      // Default demo data if no stored data
+      setUserData({
+        title: "Dr.",
+        firstName: "Sarah",
+        lastName: "Johnson",
+        email: "sarah.johnson@hospital.com"
+      });
+    }
+    
+    if (storedUserType) {
+      setUserType(storedUserType);
+    } else {
+      setUserType('professional'); // Default
+    }
+  }, []);
+
+  const getDisplayName = () => {
+    if (!userData) return "Healthcare Professional";
+    
+    const title = userData.title ? userData.title + " " : "";
+    return `${title}${userData.firstName} ${userData.lastName}`;
+  };
+
+  const getUserRole = () => {
+    if (userType === 'caretaker') {
+      return userData?.relationship ? `Caretaker (${userData.relationship.replace('family-', '').replace('-', ' ')})` : 'Caretaker';
+    }
+    return 'Healthcare Professional';
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-background">
@@ -48,7 +95,14 @@ const Dashboard = () => {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-foreground">
                 JEG<span className="text-green-600">Health</span> Dashboard
               </h1>
-              <p className="text-gray-600 dark:text-muted-foreground">Healthcare Professional Portal</p>
+              <div className="flex items-center space-x-4 mt-1">
+                <p className="text-gray-600 dark:text-muted-foreground">
+                  Welcome, {getDisplayName()}
+                </p>
+                <Badge variant="outline" className="text-blue-600 border-blue-600">
+                  {getUserRole()}
+                </Badge>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <Badge variant="outline" className="text-green-600 border-green-600">
@@ -151,3 +205,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+}
