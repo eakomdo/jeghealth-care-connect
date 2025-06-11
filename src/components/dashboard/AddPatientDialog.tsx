@@ -29,22 +29,16 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
     firstName: '',
     lastName: '',
     age: '',
+    careCode: '',
     status: 'stable' as const
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const generateCareCode = (firstName: string, lastName: string) => {
-    const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-    const year = new Date().getFullYear();
-    const random = Math.floor(Math.random() * 999) + 1;
-    return `${initials}${year}${random.toString().padStart(3, '0')}`;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.firstName || !formData.lastName || !formData.age) {
+    if (!formData.firstName || !formData.lastName || !formData.age || !formData.careCode) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -63,19 +57,29 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
       return;
     }
 
+    // Validate care code format (simple validation for demo)
+    if (formData.careCode.length < 6) {
+      toast({
+        title: "Error",
+        description: "Care code must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Simulate API call delay
+      // Simulate API call to verify the care code exists and is valid
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       const newPatient: Patient = {
         id: Date.now(), // Simple ID generation for demo
         name: `${formData.firstName} ${formData.lastName}`,
         age: age,
-        careCode: generateCareCode(formData.firstName, formData.lastName),
+        careCode: formData.careCode.toUpperCase(),
         status: formData.status,
-        lastReading: "Just added",
+        lastReading: "Just connected",
         heartRate: 75 + Math.floor(Math.random() * 20), // Random baseline
         oxygenLevel: 95 + Math.floor(Math.random() * 5) // Random baseline
       };
@@ -83,8 +87,8 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
       onAddPatient(newPatient);
       
       toast({
-        title: "Patient Added",
-        description: `${newPatient.name} has been successfully added with care code ${newPatient.careCode}.`,
+        title: "Patient Connected",
+        description: `${newPatient.name} has been successfully connected with care code ${newPatient.careCode}.`,
       });
 
       // Reset form
@@ -92,6 +96,7 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
         firstName: '',
         lastName: '',
         age: '',
+        careCode: '',
         status: 'stable'
       });
 
@@ -99,7 +104,7 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add patient. Please try again.",
+        description: "Failed to connect patient. Please verify the care code is valid.",
         variant: "destructive"
       });
     } finally {
@@ -118,10 +123,25 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Patient</DialogTitle>
+          <DialogTitle>Connect Patient for Monitoring</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="careCode">Patient Care Code *</Label>
+            <Input
+              id="careCode"
+              value={formData.careCode}
+              onChange={(e) => handleInputChange('careCode', e.target.value)}
+              placeholder="Enter patient's unique care code"
+              disabled={isSubmitting}
+              className="font-mono"
+            />
+            <p className="text-xs text-gray-500">
+              Enter the unique code from the patient's monitoring device
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name *</Label>
@@ -187,7 +207,7 @@ const AddPatientDialog = ({ open, onOpenChange, onAddPatient }: AddPatientDialog
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Adding..." : "Add Patient"}
+              {isSubmitting ? "Connecting..." : "Connect Patient"}
             </Button>
           </DialogFooter>
         </form>

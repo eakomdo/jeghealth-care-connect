@@ -88,8 +88,8 @@ const Dashboard = () => {
   };
 
   const handleAddPatient = (newPatient: Patient) => {
-    console.log('New patient added:', newPatient);
-    // In a real app, this would make an API call to save the patient
+    console.log('New patient connected:', newPatient);
+    // In a real app, this would make an API call to connect the patient's monitoring device
     // For now, we'll just log it and could update local state if needed
   };
 
@@ -120,7 +120,7 @@ const Dashboard = () => {
               <Button variant="outline" onClick={() => setIsSettingsOpen(true)}>
                 Settings
               </Button>
-              <Button onClick={() => setIsAddPatientOpen(true)}>Add Patient</Button>
+              <Button onClick={() => setIsAddPatientOpen(true)}>Connect Patient</Button>
             </div>
           </div>
         </div>
