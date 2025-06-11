@@ -345,5 +345,3 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
 };
 
 export default ECGMonitor;
-
-</edits_to_apply>
