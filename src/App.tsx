@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import SignupProfessional from './pages/SignupProfessional';
 import SignupCaretaker from './pages/SignupCaretaker';
 import ForgotPassword from './pages/ForgotPassword';
+import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/signup/professional" element={<SignupProfessional />} />
           <Route path="/signup/caretaker" element={<SignupCaretaker />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
