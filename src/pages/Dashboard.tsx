@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Heart, Activity, User, MapPin, AlertTriangle, TrendingUp } from "lucide-react";
 import PatientList from "@/components/dashboard/PatientList";
 import HealthMetrics from "@/components/dashboard/HealthMetrics";
@@ -11,6 +12,7 @@ import ECGMonitor from "@/components/dashboard/ECGMonitor";
 import PulseOximeter from "@/components/dashboard/PulseOximeter";
 import MovementTracker from "@/components/dashboard/MovementTracker";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
+import SettingsPanel from "@/components/dashboard/SettingsPanel";
 
 type PatientStatus = "stable" | "warning" | "critical";
 
@@ -34,25 +36,28 @@ const Dashboard = () => {
   });
 
   const [activeTab, setActiveTab] = useState("overview");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-background">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-card border-b border-border">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-foreground">
                 JEG<span className="text-green-600">Health</span> Dashboard
               </h1>
-              <p className="text-gray-600">Healthcare Professional Portal</p>
+              <p className="text-gray-600 dark:text-muted-foreground">Healthcare Professional Portal</p>
             </div>
             <div className="flex items-center space-x-4">
               <Badge variant="outline" className="text-green-600 border-green-600">
                 <Activity className="w-4 h-4 mr-1" />
                 Live Monitoring
               </Badge>
-              <Button variant="outline">Settings</Button>
+              <Button variant="outline" onClick={() => setIsSettingsOpen(true)}>
+                Settings
+              </Button>
               <Button>Add Patient</Button>
             </div>
           </div>
@@ -76,12 +81,12 @@ const Dashboard = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-green-100 rounded-full">
+                    <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-full">
                       <User className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
                       <CardTitle className="text-xl">{selectedPatient.name}</CardTitle>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 dark:text-muted-foreground">
                         Age: {selectedPatient.age} • Care Code: {selectedPatient.careCode}
                       </p>
                     </div>
@@ -93,7 +98,7 @@ const Dashboard = () => {
                     >
                       {selectedPatient.status.toUpperCase()}
                     </Badge>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground">
                       Last reading: {selectedPatient.lastReading}
                     </p>
                   </div>
@@ -134,6 +139,13 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Settings Dialog */}
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] overflow-y-auto">
+          <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
