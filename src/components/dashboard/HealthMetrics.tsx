@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { Heart, Activity, MapPin, TrendingUp, Download } from "lucide-react";
+import jsPDF from 'jspdf';
 
 interface HealthMetricsProps {
   patientId: number;
@@ -123,53 +125,92 @@ const HealthMetrics = ({ patientId }: HealthMetricsProps) => {
   };
 
   const downloadPDF = (data: any) => {
-    // Simple HTML to PDF conversion (for demo purposes)
-    const htmlContent = `
-      <html>
-        <head>
-          <title>Health Metrics Report - Patient ${patientId}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { color: #333; }
-            table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <h1>Health Metrics Report</h1>
-          <p>Patient ID: ${patientId}</p>
-          <p>Report Generated: ${new Date().toLocaleDateString()}</p>
-          
-          <h2>Current Metrics</h2>
-          <table>
-            <tr><th>Metric</th><th>Value</th><th>Status</th></tr>
-            <tr><td>Heart Rate</td><td>${data.currentMetrics.heartRate} bpm</td><td>Normal</td></tr>
-            <tr><td>Oxygen Saturation</td><td>${data.currentMetrics.spO2}%</td><td>Normal</td></tr>
-            <tr><td>Daily Steps</td><td>${data.currentMetrics.activity}</td><td>Active</td></tr>
-            <tr><td>Location</td><td>${data.currentMetrics.location}</td><td>Safe</td></tr>
-          </table>
-          
-          <h2>24-Hour Heart Rate Data</h2>
-          <table>
-            <tr><th>Time</th><th>Heart Rate (bpm)</th></tr>
-            ${data.heartRateData.map((item: any) => `<tr><td>${item.time}</td><td>${item.value}</td></tr>`).join('')}
-          </table>
-        </body>
-      </html>
-    `;
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    let yPosition = margin;
 
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `patient-${patientId}-health-metrics-${new Date().toISOString().split('T')[0]}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    console.log('HTML report downloaded. For PDF conversion, you can print this HTML file as PDF from your browser.');
+    // Header
+    pdf.setFontSize(20);
+    pdf.text('Health Metrics Report', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    pdf.text(`Patient ID: ${patientId}`, margin, yPosition);
+    yPosition += 8;
+    pdf.text(`Report Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
+    yPosition += 20;
+
+    // Current Metrics Section
+    pdf.setFontSize(16);
+    pdf.text('Current Metrics', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    const metrics = [
+      [`Heart Rate: ${data.currentMetrics.heartRate} bpm`, 'Normal'],
+      [`Oxygen Saturation: ${data.currentMetrics.spO2}%`, 'Normal'],
+      [`Daily Steps: ${data.currentMetrics.activity}`, 'Active'],
+      [`Location: ${data.currentMetrics.location}`, 'Safe']
+    ];
+
+    metrics.forEach(([metric, status]) => {
+      pdf.text(metric, margin, yPosition);
+      pdf.text(status, pageWidth - margin - 30, yPosition);
+      yPosition += 8;
+    });
+
+    yPosition += 15;
+
+    // Heart Rate Data Section
+    pdf.setFontSize(16);
+    pdf.text('24-Hour Heart Rate Data', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(10);
+    pdf.text('Time', margin, yPosition);
+    pdf.text('Heart Rate (bpm)', margin + 40, yPosition);
+    yPosition += 8;
+
+    data.heartRateData.forEach((item: any) => {
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+      pdf.text(item.time, margin, yPosition);
+      pdf.text(item.value.toString(), margin + 40, yPosition);
+      yPosition += 6;
+    });
+
+    // Add new page for oxygen data if needed
+    if (yPosition > 200) {
+      pdf.addPage();
+      yPosition = margin;
+    } else {
+      yPosition += 15;
+    }
+
+    // Oxygen Saturation Data Section
+    pdf.setFontSize(16);
+    pdf.text('24-Hour Oxygen Saturation Data', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(10);
+    pdf.text('Time', margin, yPosition);
+    pdf.text('SpO2 (%)', margin + 40, yPosition);
+    yPosition += 8;
+
+    data.oxygenData.forEach((item: any) => {
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+      pdf.text(item.time, margin, yPosition);
+      pdf.text(item.value.toString(), margin + 40, yPosition);
+      yPosition += 6;
+    });
+
+    pdf.save(`patient-${patientId}-health-metrics-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   return (
@@ -190,7 +231,7 @@ const HealthMetrics = ({ patientId }: HealthMetricsProps) => {
               </Button>
               <Button variant="outline" size="sm" onClick={() => downloadHealthData('pdf')}>
                 <Download className="w-4 h-4 mr-1" />
-                Report
+                PDF
               </Button>
             </div>
           </div>

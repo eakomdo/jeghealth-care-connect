@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area } from "recharts";
 import { Activity, Droplets, TrendingUp, AlertCircle, Download } from "lucide-react";
+import jsPDF from 'jspdf';
 
 interface PulseOximeterProps {
   patientId: number;
@@ -36,7 +37,7 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
     },
   };
 
-  const downloadOximeterData = (format: 'json' | 'csv' | 'report') => {
+  const downloadOximeterData = (format: 'json' | 'csv' | 'pdf') => {
     const oximeterData = {
       patientId,
       timestamp: new Date().toISOString(),
@@ -62,8 +63,8 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
       case 'csv':
         downloadCSV(oximeterData);
         break;
-      case 'report':
-        downloadReport(oximeterData);
+      case 'pdf':
+        downloadPDF(oximeterData);
         break;
     }
   };
@@ -98,73 +99,91 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
     URL.revokeObjectURL(url);
   };
 
-  const downloadReport = (data: any) => {
-    const htmlContent = `
-      <html>
-        <head>
-          <title>Pulse Oximeter Report - Patient ${patientId}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { color: #333; }
-            .metrics { display: flex; gap: 20px; margin: 20px 0; }
-            .metric-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
-            table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <h1>Pulse Oximeter Report</h1>
-          <p>Patient ID: ${patientId}</p>
-          <p>Report Generated: ${new Date().toLocaleDateString()}</p>
-          
-          <h2>Current Readings</h2>
-          <div class="metrics">
-            <div class="metric-card">
-              <h3>SpO2</h3>
-              <p>${data.currentReadings.spo2}%</p>
-              <small>Normal Range</small>
-            </div>
-            <div class="metric-card">
-              <h3>Pulse Rate</h3>
-              <p>${data.currentReadings.pulseRate} BPM</p>
-              <small>Normal</small>
-            </div>
-            <div class="metric-card">
-              <h3>Trend</h3>
-              <p>${data.currentReadings.trend}</p>
-              <small>Last 4 hours</small>
-            </div>
-          </div>
-          
-          <h2>Device Information</h2>
-          <table>
-            <tr><th>Parameter</th><th>Value</th></tr>
-            <tr><td>Device Model</td><td>${data.deviceInfo.model}</td></tr>
-            <tr><td>Connection Status</td><td>${data.deviceInfo.status}</td></tr>
-            <tr><td>Signal Quality</td><td>${data.deviceInfo.signalQuality}</td></tr>
-            <tr><td>Battery Level</td><td>${data.deviceInfo.batteryLevel}</td></tr>
-            <tr><td>Last Sync</td><td>${data.deviceInfo.lastSync}</td></tr>
-          </table>
-          
-          <h2>24-Hour Trend Data</h2>
-          <table>
-            <tr><th>Time</th><th>SpO2 (%)</th><th>Heart Rate (BPM)</th></tr>
-            ${data.trendData.map((item: any) => `<tr><td>${item.time}</td><td>${item.spo2}</td><td>${item.heartRate}</td></tr>`).join('')}
-          </table>
-        </body>
-      </html>
-    `;
+  const downloadPDF = (data: any) => {
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    let yPosition = margin;
 
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `patient-${patientId}-pulse-oximeter-report-${new Date().toISOString().split('T')[0]}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Header
+    pdf.setFontSize(20);
+    pdf.text('Pulse Oximeter Report', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    pdf.text(`Patient ID: ${patientId}`, margin, yPosition);
+    yPosition += 8;
+    pdf.text(`Report Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
+    yPosition += 20;
+
+    // Current Readings Section
+    pdf.setFontSize(16);
+    pdf.text('Current Readings', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    const currentReadings = [
+      ['SpO2:', `${data.currentReadings.spo2}%`, 'Normal Range'],
+      ['Pulse Rate:', `${data.currentReadings.pulseRate} BPM`, 'Normal'],
+      ['Trend:', data.currentReadings.trend, 'Last 4 hours']
+    ];
+
+    currentReadings.forEach(([label, value, status]) => {
+      pdf.setFont(undefined, 'bold');
+      pdf.text(label, margin, yPosition);
+      pdf.setFont(undefined, 'normal');
+      pdf.text(value, margin + 40, yPosition);
+      pdf.text(status, margin + 90, yPosition);
+      yPosition += 10;
+    });
+
+    yPosition += 15;
+
+    // Device Information Section
+    pdf.setFontSize(16);
+    pdf.text('Device Information', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    const deviceInfo = [
+      ['Device Model:', data.deviceInfo.model],
+      ['Connection Status:', data.deviceInfo.status],
+      ['Signal Quality:', data.deviceInfo.signalQuality],
+      ['Battery Level:', data.deviceInfo.batteryLevel],
+      ['Last Sync:', data.deviceInfo.lastSync]
+    ];
+
+    deviceInfo.forEach(([label, value]) => {
+      pdf.text(label, margin, yPosition);
+      pdf.text(value, margin + 70, yPosition);
+      yPosition += 8;
+    });
+
+    yPosition += 15;
+
+    // 24-Hour Trend Data Section
+    pdf.setFontSize(16);
+    pdf.text('24-Hour Trend Data', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(10);
+    pdf.text('Time', margin, yPosition);
+    pdf.text('SpO2 (%)', margin + 40, yPosition);
+    pdf.text('Heart Rate (BPM)', margin + 80, yPosition);
+    yPosition += 8;
+
+    data.trendData.forEach((item: any) => {
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+      pdf.text(item.time, margin, yPosition);
+      pdf.text(item.spo2.toString(), margin + 40, yPosition);
+      pdf.text(item.heartRate.toString(), margin + 80, yPosition);
+      yPosition += 6;
+    });
+
+    pdf.save(`patient-${patientId}-pulse-oximeter-report-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   return (
@@ -183,9 +202,9 @@ const PulseOximeter = ({ patientId }: PulseOximeterProps) => {
                 <Download className="w-4 h-4 mr-1" />
                 CSV
               </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadOximeterData('report')}>
+              <Button variant="outline" size="sm" onClick={() => downloadOximeterData('pdf')}>
                 <Download className="w-4 h-4 mr-1" />
-                Report
+                PDF
               </Button>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChartContainer } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Heart, Play, Pause, Download, AlertTriangle } from "lucide-react";
+import jsPDF from 'jspdf';
 
 interface ECGMonitorProps {
   patientId: number;
@@ -52,7 +53,7 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
     },
   };
 
-  const downloadECGData = (format: 'json' | 'csv' | 'report') => {
+  const downloadECGData = (format: 'json' | 'csv' | 'pdf') => {
     const ecgAnalysis = {
       patientId,
       timestamp: new Date().toISOString(),
@@ -82,8 +83,8 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
       case 'csv':
         downloadCSV(ecgAnalysis);
         break;
-      case 'report':
-        downloadReport(ecgAnalysis);
+      case 'pdf':
+        downloadPDF(ecgAnalysis);
         break;
     }
   };
@@ -118,82 +119,97 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
     URL.revokeObjectURL(url);
   };
 
-  const downloadReport = (data: any) => {
-    const htmlContent = `
-      <html>
-        <head>
-          <title>ECG Analysis Report - Patient ${patientId}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { color: #333; }
-            .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
-            .analysis-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
-            .alert-box { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0; }
-            table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <h1>ECG Analysis Report</h1>
-          <p>Patient ID: ${patientId}</p>
-          <p>Report Generated: ${new Date().toLocaleDateString()}</p>
-          <p>Recording Duration: ${data.recordingDuration.toFixed(1)} seconds</p>
-          
-          <h2>ECG Analysis</h2>
-          <div class="analysis-grid">
-            <div class="analysis-card">
-              <h3>Heart Rate</h3>
-              <p style="font-size: 24px; color: #e74c3c;">${data.analysis.heartRate} BPM</p>
-              <small>Normal range</small>
-            </div>
-            <div class="analysis-card">
-              <h3>Rhythm</h3>
-              <p style="font-size: 18px; color: #27ae60;">${data.analysis.rhythm}</p>
-              <small>Regular pattern detected</small>
-            </div>
-            <div class="analysis-card">
-              <h3>Heart Rate Variability</h3>
-              <p style="font-size: 18px; color: #3498db;">${data.analysis.heartRateVariability}</p>
-              <small>RMSSD - Normal</small>
-            </div>
-            <div class="analysis-card">
-              <h3>QT Interval</h3>
-              <p style="font-size: 18px; color: #27ae60;">${data.analysis.qtInterval}</p>
-              <small>Within normal range</small>
-            </div>
-          </div>
-          
-          <h2>Clinical Notes</h2>
-          ${data.alerts.map((alert: any) => `
-            <div class="alert-box">
-              <strong>${alert.type.toUpperCase()}:</strong> ${alert.message}
-              <br><small>Frequency: ${alert.frequency} | Severity: ${alert.severity}</small>
-            </div>
-          `).join('')}
-          
-          <h2>Recommendations</h2>
-          <ul>
-            <li>Continue routine monitoring</li>
-            <li>Follow up on PVC frequency in next assessment</li>
-            <li>Maintain current medication regimen</li>
-            <li>Schedule cardiology consultation if PVC frequency increases</li>
-          </ul>
-          
-          <p><small>Last Analysis: ${data.analysis.lastAnalysis}</small></p>
-        </body>
-      </html>
-    `;
+  const downloadPDF = (data: any) => {
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    let yPosition = margin;
 
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `patient-${patientId}-ecg-report-${new Date().toISOString().split('T')[0]}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Header
+    pdf.setFontSize(20);
+    pdf.text('ECG Analysis Report', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    pdf.text(`Patient ID: ${patientId}`, margin, yPosition);
+    yPosition += 8;
+    pdf.text(`Report Generated: ${new Date().toLocaleDateString()}`, margin, yPosition);
+    yPosition += 8;
+    pdf.text(`Recording Duration: ${data.recordingDuration.toFixed(1)} seconds`, margin, yPosition);
+    yPosition += 20;
+
+    // ECG Analysis Section
+    pdf.setFontSize(16);
+    pdf.text('ECG Analysis', margin, yPosition);
+    yPosition += 15;
+
+    // Analysis metrics in a grid-like format
+    pdf.setFontSize(12);
+    const analysisData = [
+      ['Heart Rate:', `${data.analysis.heartRate} BPM`, 'Normal range'],
+      ['Rhythm:', data.analysis.rhythm, 'Regular pattern detected'],
+      ['Heart Rate Variability:', data.analysis.heartRateVariability, 'RMSSD - Normal'],
+      ['QT Interval:', data.analysis.qtInterval, 'Within normal range']
+    ];
+
+    analysisData.forEach(([label, value, note]) => {
+      pdf.setFont(undefined, 'bold');
+      pdf.text(label, margin, yPosition);
+      pdf.setFont(undefined, 'normal');
+      pdf.text(value, margin + 60, yPosition);
+      pdf.setFontSize(10);
+      pdf.text(note, margin + 120, yPosition);
+      pdf.setFontSize(12);
+      yPosition += 12;
+    });
+
+    yPosition += 15;
+
+    // Clinical Notes Section
+    pdf.setFontSize(16);
+    pdf.text('Clinical Notes', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    data.alerts.forEach((alert: any) => {
+      pdf.setFont(undefined, 'bold');
+      pdf.text(`${alert.type.toUpperCase()}:`, margin, yPosition);
+      pdf.setFont(undefined, 'normal');
+      yPosition += 8;
+      
+      const message = pdf.splitTextToSize(alert.message, pageWidth - 2 * margin);
+      pdf.text(message, margin, yPosition);
+      yPosition += message.length * 6 + 5;
+      
+      pdf.setFontSize(10);
+      pdf.text(`Frequency: ${alert.frequency} | Severity: ${alert.severity}`, margin, yPosition);
+      pdf.setFontSize(12);
+      yPosition += 15;
+    });
+
+    // Recommendations Section
+    pdf.setFontSize(16);
+    pdf.text('Recommendations', margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    const recommendations = [
+      'Continue routine monitoring',
+      'Follow up on PVC frequency in next assessment',
+      'Maintain current medication regimen',
+      'Schedule cardiology consultation if PVC frequency increases'
+    ];
+
+    recommendations.forEach((rec, index) => {
+      pdf.text(`${index + 1}. ${rec}`, margin, yPosition);
+      yPosition += 8;
+    });
+
+    yPosition += 15;
+    pdf.setFontSize(10);
+    pdf.text(`Last Analysis: ${data.analysis.lastAnalysis}`, margin, yPosition);
+
+    pdf.save(`patient-${patientId}-ecg-report-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   return (
@@ -225,9 +241,9 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
                 <Download className="w-4 h-4 mr-1" />
                 CSV
               </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadECGData('report')}>
+              <Button variant="outline" size="sm" onClick={() => downloadECGData('pdf')}>
                 <Download className="w-4 h-4 mr-1" />
-                Report
+                PDF
               </Button>
             </div>
           </div>
@@ -329,3 +345,5 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
 };
 
 export default ECGMonitor;
+
+</edits_to_apply>
