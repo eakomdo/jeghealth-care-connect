@@ -21,7 +21,7 @@ const Navigation = () => {
           {/* Logo */}
           <div className="flex items-center">
             <h1 className="text-2xl font-bold text-gray-900">
-              JEG<span className="text-teal-500">Health</span>
+              JEG<span className="text-green-600">Health</span>
             </h1>
           </div>
 
@@ -31,7 +31,7 @@ const Navigation = () => {
               <a
                 key={item.label}
                 href={item.href}
-                className="text-gray-600 hover:text-teal-500 font-medium transition-colors duration-200"
+                className="text-gray-600 hover:text-green-600 font-medium transition-colors duration-200"
               >
                 {item.label}
               </a>
@@ -42,11 +42,11 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-4">
             <Button 
               variant="ghost" 
-              className="text-gray-600 hover:text-teal-500"
+              className="text-gray-600 hover:text-green-600"
             >
               Sign In
             </Button>
-            <Button className="bg-teal-500 hover:bg-teal-600 text-white">
+            <Button className="bg-green-600 hover:bg-green-700 text-white">
               Get Started
             </Button>
           </div>
@@ -71,7 +71,7 @@ const Navigation = () => {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-gray-600 hover:text-teal-500 font-medium py-2"
+                  className="text-gray-600 hover:text-green-600 font-medium py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
@@ -80,11 +80,11 @@ const Navigation = () => {
               <div className="pt-4 border-t border-gray-200">
                 <Button 
                   variant="ghost" 
-                  className="w-full mb-2 text-gray-600 hover:text-teal-500"
+                  className="w-full mb-2 text-gray-600 hover:text-green-600"
                 >
                   Sign In
                 </Button>
-                <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white">
+                <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
                   Get Started
                 </Button>
               </div>

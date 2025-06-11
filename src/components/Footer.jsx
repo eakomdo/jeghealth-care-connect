@@ -11,7 +11,7 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="col-span-1 lg:col-span-2">
             <h3 className="text-3xl font-bold mb-4">
-              JEG<span className="text-teal-400">Health</span>
+              JEG<span className="text-green-400">Health</span>
             </h3>
             <p className="text-gray-300 mb-6 max-w-md leading-relaxed">
               Professional IoT health monitoring platform designed for healthcare 
@@ -28,11 +28,11 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Platform</h4>
             <ul className="space-y-3">
-              <li><a href="#features" className="text-gray-300 hover:text-teal-400 transition-colors">Features</a></li>
-              <li><a href="#security" className="text-gray-300 hover:text-teal-400 transition-colors">Security</a></li>
-              <li><a href="#integrations" className="text-gray-300 hover:text-teal-400 transition-colors">Integrations</a></li>
-              <li><a href="#api" className="text-gray-300 hover:text-teal-400 transition-colors">API Documentation</a></li>
-              <li><a href="#pricing" className="text-gray-300 hover:text-teal-400 transition-colors">Pricing</a></li>
+              <li><a href="#features" className="text-gray-300 hover:text-green-400 transition-colors">Features</a></li>
+              <li><a href="#security" className="text-gray-300 hover:text-green-400 transition-colors">Security</a></li>
+              <li><a href="#integrations" className="text-gray-300 hover:text-green-400 transition-colors">Integrations</a></li>
+              <li><a href="#api" className="text-gray-300 hover:text-green-400 transition-colors">API Documentation</a></li>
+              <li><a href="#pricing" className="text-gray-300 hover:text-green-400 transition-colors">Pricing</a></li>
             </ul>
           </div>
 
@@ -63,9 +63,9 @@ const Footer = () => {
               © {currentYear} JEGHealth. All rights reserved. HIPAA Compliant Healthcare Technology.
             </div>
             <div className="flex space-x-6 text-sm">
-              <a href="#privacy" className="text-gray-400 hover:text-teal-400 transition-colors">Privacy Policy</a>
-              <a href="#terms" className="text-gray-400 hover:text-teal-400 transition-colors">Terms of Service</a>
-              <a href="#compliance" className="text-gray-400 hover:text-teal-400 transition-colors">HIPAA Compliance</a>
+              <a href="#privacy" className="text-gray-400 hover:text-green-400 transition-colors">Privacy Policy</a>
+              <a href="#terms" className="text-gray-400 hover:text-green-400 transition-colors">Terms of Service</a>
+              <a href="#compliance" className="text-gray-400 hover:text-green-400 transition-colors">HIPAA Compliance</a>
             </div>
           </div>
         </div>

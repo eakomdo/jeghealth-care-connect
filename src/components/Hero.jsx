@@ -4,12 +4,12 @@ import { Shield, Activity, Users } from "lucide-react";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-32 h-32 border border-teal-300 rounded-full"></div>
-        <div className="absolute top-40 right-32 w-24 h-24 border border-cyan-300 rounded-full"></div>
-        <div className="absolute bottom-32 left-1/4 w-40 h-40 border border-teal-400 rounded-full"></div>
+        <div className="absolute top-20 left-20 w-32 h-32 border border-green-300 rounded-full"></div>
+        <div className="absolute top-40 right-32 w-24 h-24 border border-green-400 rounded-full"></div>
+        <div className="absolute bottom-32 left-1/4 w-40 h-40 border border-green-300 rounded-full"></div>
       </div>
       
       <div className="container mx-auto px-6 text-center relative z-10">
@@ -17,16 +17,16 @@ const Hero = () => {
           {/* Logo/Brand */}
           <div className="mb-8">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
-              JEG<span className="text-teal-500">Health</span>
+              JEG<span className="text-green-600">Health</span>
             </h1>
-            <div className="w-24 h-1 bg-teal-500 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-green-600 mx-auto rounded-full"></div>
           </div>
           
           {/* Main Headline */}
           <h2 className="text-3xl md:text-4xl font-semibold text-gray-800 mb-6 leading-tight">
             Professional IoT Health Monitoring
             <br />
-            <span className="text-teal-500">For Healthcare Excellence</span>
+            <span className="text-green-600">For Healthcare Excellence</span>
           </h2>
           
           {/* Subtitle */}
@@ -39,20 +39,20 @@ const Hero = () => {
           {/* Key Features Icons */}
           <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-12">
             <div className="flex items-center gap-3 text-gray-700">
-              <div className="p-3 bg-teal-100 rounded-full">
-                <Activity className="w-6 h-6 text-teal-500" />
+              <div className="p-3 bg-green-100 rounded-full">
+                <Activity className="w-6 h-6 text-green-600" />
               </div>
               <span className="font-medium">Real-time Monitoring</span>
             </div>
             <div className="flex items-center gap-3 text-gray-700">
-              <div className="p-3 bg-teal-100 rounded-full">
-                <Shield className="w-6 h-6 text-teal-500" />
+              <div className="p-3 bg-green-100 rounded-full">
+                <Shield className="w-6 h-6 text-green-600" />
               </div>
               <span className="font-medium">HIPAA Compliant</span>
             </div>
             <div className="flex items-center gap-3 text-gray-700">
-              <div className="p-3 bg-teal-100 rounded-full">
-                <Users className="w-6 h-6 text-teal-500" />
+              <div className="p-3 bg-green-100 rounded-full">
+                <Users className="w-6 h-6 text-green-600" />
               </div>
               <span className="font-medium">Multi-Patient Dashboard</span>
             </div>
@@ -62,16 +62,16 @@ const Hero = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-4 text-lg font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Get Started
             </Button>
             <Button 
               variant="outline" 
               size="lg"
-              className="border-2 border-teal-500 text-teal-500 hover:bg-teal-50 px-8 py-4 text-lg font-medium rounded-lg transition-all duration-300"
+              className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-8 py-4 text-lg font-medium rounded-lg transition-all duration-300"
             >
-              Get Started
+              Learn More
             </Button>
           </div>
           

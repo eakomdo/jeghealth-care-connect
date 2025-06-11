@@ -62,7 +62,7 @@ const Features = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-teal-50">
+    <section className="py-20 bg-gradient-to-br from-green-50 to-white">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -83,8 +83,8 @@ const Features = () => {
               <CardContent className="p-8">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <div className="p-3 bg-teal-100 rounded-lg">
-                      <feature.icon className="w-8 h-8 text-teal-500" />
+                    <div className="p-3 bg-green-100 rounded-lg">
+                      <feature.icon className="w-8 h-8 text-green-600" />
                     </div>
                   </div>
                   <div>
