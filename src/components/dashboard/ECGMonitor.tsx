@@ -25,7 +25,7 @@ const ECGMonitor = ({ patientId }: ECGMonitorProps) => {
         
         // Generate ECG-like waveform
         const baseValue = Math.sin(newTime * 0.1) * 10;
-        const heartBeat = Math.sin(newTime * 0.8) * 50 * Math.exp(-((newTime % 10) - 2) ** 2);
+        const heartBeat = Math.sin(newTime * 0.8) * 50 * Math.exp(-(((newTime % 10) - 2) ** 2));
         const noise = (Math.random() - 0.5) * 5;
         
         newData.push({
