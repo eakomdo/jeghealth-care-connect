@@ -1,24 +1,22 @@
 
 import { Button } from "@/components/ui/button";
-import { Shield, Activity, Users } from "lucide-react";
+import { Shield, Activity, Users, Heart } from "lucide-react";
 
 const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-32 h-32 border border-green-300 rounded-full"></div>
-        <div className="absolute top-40 right-32 w-24 h-24 border border-green-400 rounded-full"></div>
-        <div className="absolute bottom-32 left-1/4 w-40 h-40 border border-green-300 rounded-full"></div>
-      </div>
-      
       <div className="container mx-auto px-6 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* Logo/Brand */}
           <div className="mb-8">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
-              JEG<span className="text-green-600">Health</span>
-            </h1>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="p-3 bg-green-600 rounded-full">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900">
+                JEG<span className="text-green-600">Health</span>
+              </h1>
+            </div>
             <div className="w-24 h-1 bg-green-600 mx-auto rounded-full"></div>
           </div>
           
