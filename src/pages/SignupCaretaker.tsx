@@ -41,24 +41,32 @@ const SignupCaretaker = () => {
       return;
     }
 
-    // Demo code - simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
-      
-      // Store user data in localStorage for demo purposes
-      localStorage.setItem('userType', 'caretaker');
-      localStorage.setItem('userData', JSON.stringify({
-        title: formData.title,
+      // Import services
+      const { authService } = await import('@/services/authService');
+      const { emailService } = await import('@/services/emailService');
+
+      // Create account
+      const userAccount = await authService.createAccount({
+        ...formData,
+        userType: 'caretaker'
+      });
+
+      // Send welcome email
+      const emailSent = await emailService.sendWelcomeEmail({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
+        userType: 'caretaker',
+        title: formData.title,
         relationship: formData.relationship
-      }));
+      });
+
+      console.log('Email sent:', emailSent);
       
-      // Demo success response
       toast({
         title: "Registration Successful!",
-        description: "Welcome to JEGHealth! You can now access the patient dashboard.",
+        description: `Welcome to JEGHealth! ${emailSent ? 'A welcome email has been sent to your inbox.' : 'You can now access the patient dashboard.'}`,
       });
       
       // Redirect to dashboard after successful registration
@@ -72,6 +80,7 @@ const SignupCaretaker = () => {
         description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
+      console.error("Signup error:", error);
     } finally {
       setIsSubmitting(false);
     }

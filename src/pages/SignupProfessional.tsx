@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -44,34 +43,33 @@ const SignupProfessional = () => {
     setIsSubmitting(true);
 
     try {
-      // Store user data in localStorage for demo purposes
-      const userData = {
-        title: formData.title,
+      console.log("Professional signup request:", formData);
+
+      // Import services
+      const { authService } = await import('@/services/authService');
+      const { emailService } = await import('@/services/emailService');
+
+      // Create account
+      const userAccount = await authService.createAccount({
+        ...formData,
+        userType: 'professional'
+      });
+
+      // Send welcome email
+      const emailSent = await emailService.sendWelcomeEmail({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        phone: formData.phone,
-        organization: formData.organization,
-        role: formData.role,
-        licenseNumber: formData.licenseNumber,
-        message: formData.message,
-        licenseDocument: licenseDocument?.name,
-        isLicenseVerified,
-        signupDate: new Date().toISOString(),
-        userType: 'professional'
-      };
+        userType: 'professional',
+        title: formData.title,
+        organization: formData.organization
+      });
 
-      localStorage.setItem('userData', JSON.stringify(userData));
-      localStorage.setItem('userType', 'professional');
-
-      console.log("Professional signup request:", userData);
-
-      // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Email sent:', emailSent);
 
       toast({
-        title: "Access Request Approved!",
-        description: "Your professional credentials have been verified. Redirecting to dashboard...",
+        title: "Account Created Successfully!",
+        description: `Welcome to JEGHealth! ${emailSent ? 'A welcome email has been sent to your inbox.' : 'You can now access your dashboard.'}`,
       });
 
       // Redirect to dashboard after short delay
@@ -81,8 +79,8 @@ const SignupProfessional = () => {
 
     } catch (error) {
       toast({
-        title: "Submission Failed",
-        description: "There was an error processing your request. Please try again.",
+        title: "Registration Failed",
+        description: "There was an error creating your account. Please try again.",
         variant: "destructive",
       });
       console.error("Signup error:", error);

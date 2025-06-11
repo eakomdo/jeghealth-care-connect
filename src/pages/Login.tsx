@@ -1,24 +1,61 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Shield, Eye, EyeOff, Heart, User, Stethoscope } from "lucide-react";
+import { Heart, Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [userType, setUserType] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt:", { ...formData, userType });
+    setIsSubmitting(true);
+
+    try {
+      const { authService } = await import('@/services/authService');
+      
+      const loginResult = await authService.login({
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (loginResult.success) {
+        toast({
+          title: "Login Successful!",
+          description: `Welcome back, ${loginResult.user?.firstName}!`,
+        });
+        
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      } else {
+        toast({
+          title: "Login Failed",
+          description: loginResult.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Login error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +66,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center py-12 px-6">
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
@@ -43,47 +80,17 @@ const Login = () => {
               </h1>
             </div>
           </Link>
-          <p className="text-gray-600 mt-2">Welcome to JEGHealth</p>
+          <p className="text-gray-600 mt-2">Sign in to your account</p>
         </div>
 
         <Card className="shadow-lg border-0">
           <CardHeader className="text-center pb-4">
-            <div className="p-3 bg-green-100 rounded-full inline-block mx-auto mb-4">
-              <Shield className="w-8 h-8 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-semibold text-gray-900">Sign In</h2>
-            <p className="text-gray-600">Choose your account type and sign in</p>
+            <h2 className="text-2xl font-semibold text-gray-900">Welcome Back</h2>
+            <p className="text-gray-600">Enter your credentials to access your dashboard</p>
           </CardHeader>
           
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* User Type Selection */}
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                  I am a:
-                </Label>
-                <RadioGroup value={userType} onValueChange={setUserType} className="grid grid-cols-1 gap-3">
-                  <div className="flex items-center space-x-3 border rounded-lg p-4 hover:bg-gray-50">
-                    <RadioGroupItem value="professional" id="professional" />
-                    <div className="flex items-center space-x-2">
-                      <Stethoscope className="w-5 h-5 text-green-600" />
-                      <Label htmlFor="professional" className="cursor-pointer">
-                        Healthcare Professional
-                      </Label>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 border rounded-lg p-4 hover:bg-gray-50">
-                    <RadioGroupItem value="caretaker" id="caretaker" />
-                    <div className="flex items-center space-x-2">
-                      <User className="w-5 h-5 text-green-600" />
-                      <Label htmlFor="caretaker" className="cursor-pointer">
-                        Caretaker
-                      </Label>
-                    </div>
-                  </div>
-                </RadioGroup>
-              </div>
-
               <div>
                 <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                   Email Address
@@ -96,7 +103,7 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   className="mt-1"
-                  placeholder="Enter your email"
+                  placeholder="your.email@example.com"
                 />
               </div>
 
@@ -112,6 +119,7 @@ const Login = () => {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
+                    className="pr-10"
                     placeholder="Enter your password"
                   />
                   <button
@@ -129,57 +137,40 @@ const Login = () => {
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-green-600 border-gray-300 rounded"
-                  />
-                  <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-600">
-                    Remember me
-                  </Label>
+                <div className="text-sm">
+                  <Link to="/forgot-password" className="text-green-600 hover:text-green-500">
+                    Forgot your password?
+                  </Link>
                 </div>
-                <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-500">
-                  Forgot password?
-                </Link>
               </div>
 
               <Button 
                 type="submit" 
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium"
-                disabled={!userType}
+                disabled={isSubmitting}
               >
-                Sign In
+                {isSubmitting ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                New to JEGHealth?{" "}
+                Don't have an account?{" "}
                 <Link to="/signup" className="text-green-600 hover:text-green-500 font-medium">
-                  Create Account
+                  Sign up here
                 </Link>
               </p>
             </div>
 
-            {/* Security Notice */}
-            <div className="mt-6 p-4 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <Shield className="w-5 h-5 text-green-600 mr-2" />
-                <p className="text-sm text-green-800">
-                  Your login is protected with enterprise-grade security and HIPAA compliance.
-                </p>
-              </div>
+            {/* Demo Account Info */}
+            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Account:</h3>
+              <p className="text-xs text-blue-700">
+                Use any email address from an account you've created. For demo purposes, any password will work for existing accounts.
+              </p>
             </div>
           </CardContent>
         </Card>
-
-        <div className="text-center mt-6">
-          <Link to="/" className="text-sm text-gray-600 hover:text-gray-500">
-            ← Back to JEGHealth Home
-          </Link>
-        </div>
       </div>
     </div>
   );
