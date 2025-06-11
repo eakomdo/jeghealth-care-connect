@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import { 
   User, 
   Bell, 
@@ -18,7 +19,8 @@ import {
   Heart, 
   Activity,
   Save,
-  RefreshCw
+  RefreshCw,
+  LogOut
 } from "lucide-react";
 
 interface SettingsPanelProps {
@@ -26,6 +28,9 @@ interface SettingsPanelProps {
 }
 
 const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   // User Profile Settings
   const [userSettings, setUserSettings] = useState({
     name: "Dr. Sarah Johnson",
@@ -105,6 +110,27 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
     console.log('Settings reset to defaults');
   };
 
+  const handleLogout = async () => {
+    try {
+      const { authService } = await import('@/services/authService');
+      authService.logout();
+      
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout Error",
+        description: "Something went wrong during logout.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
@@ -120,7 +146,7 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               Profile
@@ -136,6 +162,10 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
             <TabsTrigger value="system" className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
               System
+            </TabsTrigger>
+            <TabsTrigger value="account" className="flex items-center gap-2">
+              <LogOut className="w-4 h-4" />
+              Account
             </TabsTrigger>
           </TabsList>
 
@@ -405,6 +435,30 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                     checked={systemSettings.dataEncryption}
                     onCheckedChange={(checked) => setSystemSettings({...systemSettings, dataEncryption: checked})}
                   />
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Account Settings */}
+          <TabsContent value="account" className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Account Management</h3>
+              
+              <div className="p-4 border rounded-lg space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Sign Out</h4>
+                  <p className="text-sm text-muted-foreground">
+                    This will log you out of your account and return you to the home page.
+                  </p>
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleLogout}
+                    className="flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </Button>
                 </div>
               </div>
             </div>

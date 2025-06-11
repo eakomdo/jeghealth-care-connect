@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, Activity, User, MapPin, AlertTriangle, TrendingUp, Brain, LogOut } from "lucide-react";
+import { Heart, Activity, User, MapPin, AlertTriangle, TrendingUp, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PatientList from "@/components/dashboard/PatientList";
 import HealthMetrics from "@/components/dashboard/HealthMetrics";
@@ -204,14 +204,6 @@ const Dashboard = () => {
                 Settings
               </Button>
               <Button onClick={() => setIsAddPatientOpen(true)}>Connect Patient</Button>
-              <Button 
-                variant="outline" 
-                onClick={handleLogout}
-                className="text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700"
-              >
-                <LogOut className="w-4 h-4 mr-1" />
-                Logout
-              </Button>
             </div>
           </div>
         </div>
@@ -340,3 +332,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+}
