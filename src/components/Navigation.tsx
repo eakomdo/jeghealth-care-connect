@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,7 +30,7 @@ const Navigation = () => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled 
-        ? 'bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm' 
+        ? 'bg-background/95 backdrop-blur-sm border-b border-border shadow-sm' 
         : 'bg-transparent'
     }`}>
       <div className="container mx-auto px-6">
@@ -40,7 +41,7 @@ const Navigation = () => {
               <div className="p-2 bg-green-600 rounded-full">
                 <Heart className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-foreground">
                 JEG<span className="text-green-600">Health</span>
               </h1>
             </Link>
@@ -54,21 +55,22 @@ const Navigation = () => {
               <a
                 key={item.label}
                 href={item.href}
-                className="text-gray-600 hover:text-green-600 font-medium transition-colors duration-200"
+                className="text-muted-foreground hover:text-green-600 font-medium transition-colors duration-200"
               >
                 {item.label}
               </a>
             ))}
           </div>
 
-          {/* Desktop CTA - Only show when scrolled */}
+          {/* Desktop CTA & Theme Toggle - Only show when scrolled */}
           <div className={`hidden md:flex items-center space-x-4 transition-opacity duration-300 ${
             isScrolled ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}>
+            <ThemeToggle />
             <Link to="/login">
               <Button 
                 variant="ghost" 
-                className="text-gray-600 hover:text-green-600"
+                className="text-muted-foreground hover:text-green-600"
               >
                 Sign In
               </Button>
@@ -80,8 +82,9 @@ const Navigation = () => {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          {/* Mobile Menu Button & Theme Toggle */}
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
@@ -94,23 +97,23 @@ const Navigation = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 bg-white/95 backdrop-blur-sm">
+          <div className="md:hidden py-4 border-t border-border bg-background/95 backdrop-blur-sm">
             <div className="flex flex-col space-y-4">
               {navItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-gray-600 hover:text-green-600 font-medium py-2"
+                  className="text-muted-foreground hover:text-green-600 font-medium py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
                 </a>
               ))}
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-border">
                 <Link to="/login">
                   <Button 
                     variant="ghost" 
-                    className="w-full mb-2 text-gray-600 hover:text-green-600"
+                    className="w-full mb-2 text-muted-foreground hover:text-green-600"
                   >
                     Sign In
                   </Button>
