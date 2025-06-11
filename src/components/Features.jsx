@@ -62,7 +62,7 @@ const Features = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-gradient-to-br from-gray-50 to-teal-50">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -84,7 +84,7 @@ const Features = () => {
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
                     <div className="p-3 bg-teal-100 rounded-lg">
-                      <feature.icon className="w-8 h-8 text-teal-600" />
+                      <feature.icon className="w-8 h-8 text-teal-500" />
                     </div>
                   </div>
                   <div>
