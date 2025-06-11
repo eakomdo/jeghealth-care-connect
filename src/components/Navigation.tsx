@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,9 +21,11 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              JEG<span className="text-blue-600">Health</span>
-            </h1>
+            <Link to="/">
+              <h1 className="text-2xl font-bold text-gray-900">
+                JEG<span className="text-green-600">Health</span>
+              </h1>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -31,7 +34,7 @@ const Navigation = () => {
               <a
                 key={item.label}
                 href={item.href}
-                className="text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200"
+                className="text-gray-600 hover:text-green-600 font-medium transition-colors duration-200"
               >
                 {item.label}
               </a>
@@ -40,15 +43,19 @@ const Navigation = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              className="text-gray-600 hover:text-blue-600"
-            >
-              Sign In
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              Get Started
-            </Button>
+            <Link to="/login">
+              <Button 
+                variant="ghost" 
+                className="text-gray-600 hover:text-green-600"
+              >
+                Sign In
+              </Button>
+            </Link>
+            <Link to="/signup">
+              <Button className="bg-green-600 hover:bg-green-700 text-white">
+                Get Started
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -71,22 +78,26 @@ const Navigation = () => {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-gray-600 hover:text-blue-600 font-medium py-2"
+                  className="text-gray-600 hover:text-green-600 font-medium py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
                 </a>
               ))}
               <div className="pt-4 border-t border-gray-200">
-                <Button 
-                  variant="ghost" 
-                  className="w-full mb-2 text-gray-600 hover:text-blue-600"
-                >
-                  Sign In
-                </Button>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                  Get Started
-                </Button>
+                <Link to="/login">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full mb-2 text-gray-600 hover:text-green-600"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                    Get Started
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
