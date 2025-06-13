@@ -132,7 +132,7 @@ const LearnMore = () => {
           </div>
         </div>
 
-        <div className="mb-16">
+        <div>
           <h3 className="text-2xl font-semibold text-gray-900 text-center mb-8">Platform Features in Detail</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {features.map((feature, index) => (
@@ -158,24 +158,6 @@ const LearnMore = () => {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-8 text-white text-center">
-          <h3 className="text-2xl font-semibold mb-4">Ready to Transform Your Healthcare Practice?</h3>
-          <p className="text-green-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of healthcare professionals who trust JEGHealth for their IoT monitoring needs. 
-            Start your journey towards better patient outcomes today.
-          </p>
-          <div className="flex justify-center">
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 text-lg font-medium"
-            >
-              <Download className="w-5 h-5 mr-2" />
-              Download Brochure
-            </Button>
           </div>
         </div>
       </div>
