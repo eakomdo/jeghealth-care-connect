@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Shield, Activity, Users, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -67,13 +66,15 @@ const Hero = () => {
                 Get Started
               </Button>
             </Link>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-8 py-4 text-lg font-medium rounded-lg transition-all duration-300"
-            >
-              Learn More
-            </Button>
+            <a href="#learn-more">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-8 py-4 text-lg font-medium rounded-lg transition-all duration-300"
+              >
+                Learn More
+              </Button>
+            </a>
           </div>
           
           {/* Trust Badge */}
