@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Users } from "lucide-react";
+import { ArrowRight, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const CTA = () => {
@@ -17,7 +17,7 @@ const CTA = () => {
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-12">
+        <div className="flex justify-center mb-12">
           <Link to="/login">
             <Button 
               size="lg" 
@@ -26,17 +26,6 @@ const CTA = () => {
               <Users className="w-5 h-5 mr-2" />
               Access Your Dashboard
               <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </Link>
-          
-          <Link to="/signup">
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 text-lg font-medium rounded-lg transition-all duration-300"
-            >
-              <Calendar className="w-5 h-5 mr-2" />
-              Request Demo
             </Button>
           </Link>
         </div>
