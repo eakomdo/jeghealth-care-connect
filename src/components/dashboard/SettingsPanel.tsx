@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,14 +32,58 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // User Profile Settings
+  // User Profile Settings - now loaded from localStorage
   const [userSettings, setUserSettings] = useState({
-    name: "Dr. Sarah Johnson",
-    email: "sarah.johnson@hospital.com",
-    department: "Cardiology",
-    license: "MD123456",
+    name: "",
+    email: "",
+    title: "",
+    firstName: "",
+    lastName: "",
+    department: "",
+    organization: "",
+    license: "",
+    licenseNumber: "",
+    phone: "",
     timezone: "UTC-5"
   });
+
+  // Load user data on component mount
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('userData');
+    const currentUser = localStorage.getItem('currentUser');
+    
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      setUserSettings({
+        name: `${userData.title || ''}${userData.title ? ' ' : ''}${userData.firstName} ${userData.lastName}`.trim(),
+        email: userData.email || '',
+        title: userData.title || '',
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        department: userData.organization || '',
+        organization: userData.organization || '',
+        license: userData.licenseNumber || '',
+        licenseNumber: userData.licenseNumber || '',
+        phone: userData.phone || '',
+        timezone: "UTC-5"
+      });
+    } else if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      setUserSettings({
+        name: `${userData.title || ''}${userData.title ? ' ' : ''}${userData.firstName} ${userData.lastName}`.trim(),
+        email: userData.email || '',
+        title: userData.title || '',
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        department: userData.organization || '',
+        organization: userData.organization || '',
+        license: userData.licenseNumber || '',
+        licenseNumber: userData.licenseNumber || '',
+        phone: userData.phone || '',
+        timezone: "UTC-5"
+      });
+    }
+  }, []);
 
   // Notification Settings
   const [notificationSettings, setNotificationSettings] = useState({
@@ -74,7 +118,23 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
   });
 
   const handleSaveSettings = () => {
-    // Save settings to localStorage or backend
+    // Update the user data in localStorage
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const updatedUser = {
+      ...currentUser,
+      title: userSettings.title,
+      firstName: userSettings.firstName,
+      lastName: userSettings.lastName,
+      email: userSettings.email,
+      organization: userSettings.organization,
+      licenseNumber: userSettings.licenseNumber,
+      phone: userSettings.phone
+    };
+    
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    localStorage.setItem('userData', JSON.stringify(updatedUser));
+    
+    // Save other settings
     localStorage.setItem('dashboard-settings', JSON.stringify({
       user: userSettings,
       notifications: notificationSettings,
@@ -82,12 +142,16 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
       system: systemSettings
     }));
     
+    toast({
+      title: "Settings Saved",
+      description: "Your profile and settings have been updated successfully.",
+    });
+    
     console.log('Settings saved successfully');
     onClose();
   };
 
   const handleResetSettings = () => {
-    // Reset to default values
     setNotificationSettings({
       criticalAlerts: true,
       warningAlerts: true,
@@ -174,11 +238,36 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
           <TabsContent value="profile" className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="title">Title</Label>
+                <Select value={userSettings.title} onValueChange={(value) => setUserSettings({...userSettings, title: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select title" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Dr.">Dr.</SelectItem>
+                    <SelectItem value="Nurse">Nurse</SelectItem>
+                    <SelectItem value="PA">PA</SelectItem>
+                    <SelectItem value="NP">NP</SelectItem>
+                    <SelectItem value="Mr.">Mr.</SelectItem>
+                    <SelectItem value="Ms.">Ms.</SelectItem>
+                    <SelectItem value="Mrs.">Mrs.</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
-                  id="name"
-                  value={userSettings.name}
-                  onChange={(e) => setUserSettings({...userSettings, name: e.target.value})}
+                  id="firstName"
+                  value={userSettings.firstName}
+                  onChange={(e) => setUserSettings({...userSettings, firstName: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={userSettings.lastName}
+                  onChange={(e) => setUserSettings({...userSettings, lastName: e.target.value})}
                 />
               </div>
               <div className="space-y-2">
@@ -191,26 +280,42 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
-                <Select value={userSettings.department} onValueChange={(value) => setUserSettings({...userSettings, department: value})}>
+                <Label htmlFor="organization">Organization/Hospital</Label>
+                <Input
+                  id="organization"
+                  value={userSettings.organization}
+                  onChange={(e) => setUserSettings({...userSettings, organization: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="licenseNumber">Medical License Number</Label>
+                <Input
+                  id="licenseNumber"
+                  value={userSettings.licenseNumber}
+                  onChange={(e) => setUserSettings({...userSettings, licenseNumber: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={userSettings.phone}
+                  onChange={(e) => setUserSettings({...userSettings, phone: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <Select value={userSettings.timezone} onValueChange={(value) => setUserSettings({...userSettings, timezone: value})}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Cardiology">Cardiology</SelectItem>
-                    <SelectItem value="Emergency">Emergency Medicine</SelectItem>
-                    <SelectItem value="ICU">Intensive Care</SelectItem>
-                    <SelectItem value="General">General Medicine</SelectItem>
+                    <SelectItem value="UTC-8">Pacific Time (UTC-8)</SelectItem>
+                    <SelectItem value="UTC-7">Mountain Time (UTC-7)</SelectItem>
+                    <SelectItem value="UTC-6">Central Time (UTC-6)</SelectItem>
+                    <SelectItem value="UTC-5">Eastern Time (UTC-5)</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="license">Medical License</Label>
-                <Input
-                  id="license"
-                  value={userSettings.license}
-                  onChange={(e) => setUserSettings({...userSettings, license: e.target.value})}
-                />
               </div>
             </div>
           </TabsContent>
