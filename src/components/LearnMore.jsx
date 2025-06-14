@@ -18,28 +18,56 @@ const LearnMore = () => {
       title: "Product Overview",
       description: "Comprehensive guide to JEGHealth's IoT monitoring platform",
       type: "PDF Guide",
-      action: "Download PDF"
+      action: "Download PDF",
+      items: [
+        "Platform Architecture Guide",
+        "Device Compatibility Matrix",
+        "Implementation Checklist",
+        "Security & Compliance Overview",
+        "Quick Start Guide"
+      ]
     },
     {
       icon: PlayCircle,
       title: "Platform Demo",
       description: "15-minute video showcasing key features and capabilities",
       type: "Video",
-      action: "Watch Demo"
+      action: "Watch Demo",
+      items: [
+        "Dashboard Walkthrough Video",
+        "Device Setup Tutorial",
+        "Patient Monitoring Demo",
+        "Analytics Features Overview",
+        "Mobile App Demo"
+      ]
     },
     {
       icon: BarChart3,
       title: "Case Studies",
       description: "Real-world success stories from healthcare facilities",
       type: "Case Study",
-      action: "Read Stories"
+      action: "Read Stories",
+      items: [
+        "Hospital Network Implementation",
+        "Home Care Provider Success",
+        "Clinic Efficiency Improvement",
+        "Remote Monitoring Results",
+        "Cost Reduction Analysis"
+      ]
     },
     {
       icon: Calendar,
       title: "Live Demo",
       description: "Schedule a personalized demo with our healthcare experts",
       type: "Live Session",
-      action: "Schedule Demo"
+      action: "Schedule Demo",
+      items: [
+        "One-on-One Consultation",
+        "Custom Use Case Review",
+        "Integration Planning Session",
+        "ROI Analysis Meeting",
+        "Technical Q&A Session"
+      ]
     }
   ];
 
@@ -116,13 +144,28 @@ const LearnMore = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {resources.map((resource, index) => (
               <Card key={index} className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <CardContent className="p-6 text-center">
-                  <div className="p-3 bg-green-100 rounded-full inline-block mb-4">
-                    <resource.icon className="w-8 h-8 text-green-600" />
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <div className="p-3 bg-green-100 rounded-full inline-block mb-4">
+                      <resource.icon className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">{resource.title}</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4">{resource.description}</p>
+                    <div className="text-green-600 text-xs font-medium mb-4">{resource.type}</div>
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">{resource.title}</h4>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">{resource.description}</p>
-                  <div className="text-green-600 text-xs font-medium mb-4">{resource.type}</div>
+                  
+                  <div className="mb-4">
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Available Resources:</h5>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      {resource.items.map((item, itemIndex) => (
+                        <li key={itemIndex} className="flex items-start">
+                          <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
                   <Button className="bg-green-600 hover:bg-green-700 text-white w-full">
                     {resource.action}
                   </Button>
