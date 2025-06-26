@@ -13,7 +13,7 @@ import NotFound from './pages/NotFound';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="jeghealth-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="jeghealth-ui-theme">
       <Router>
         <div className="min-h-screen">
           <Routes>
