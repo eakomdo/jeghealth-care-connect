@@ -1,3 +1,10 @@
+
+# JEGHealth - Care Connect
+
+A professional IoT health monitoring platform designed for healthcare professionals and caregivers. Built with modern web technologies for secure, reliable, and compliant healthcare solutions.
+
+## Getting Started
+
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
 Follow these steps:
@@ -16,7 +23,9 @@ npm i
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Development
+
+**Edit files directly in GitHub**
 
 - Navigate to the desired file(s).
 - Click the "Edit" button (pencil icon) at the top right of the file view.
@@ -30,24 +39,33 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## Technologies Used
 
-This project is built with:
+This project is built with modern web technologies:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Vite** - Fast build tool and development server
+- **TypeScript** - Type-safe JavaScript
+- **React** - Component-based UI library
+- **shadcn/ui** - High-quality UI components
+- **Tailwind CSS** - Utility-first CSS framework
+- **React Router** - Client-side routing
+- **React Query** - Data fetching and state management
+- **Lucide React** - Beautiful icons
+- **Recharts** - Responsive charts and data visualization
 
-## How can I deploy this project?
+## Features
 
-Simply open [Lovable](https://lovable.dev/projects/8279a036-6f33-4958-b6ed-c2ff8736ab9c) and click on Share -> Publish.
+- 📊 Real-time health monitoring
+- 🔒 HIPAA compliant security
+- 👥 Multi-user support (healthcare professionals and caretakers)
+- 📱 Responsive design for all devices
+- 🔐 Secure authentication system
+- 📈 Advanced analytics and reporting
 
-## Can I connect a custom domain to my Lovable project?
+## Author
 
-Yes, you can!
+Created by [eakomdo](https://github.com/eakomdo)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is proprietary software. All rights reserved.
