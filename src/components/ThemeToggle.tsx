@@ -1,5 +1,5 @@
 
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "./ThemeProvider";
 
@@ -16,16 +16,32 @@ export function ThemeToggle() {
     }
   };
 
+  const getIcon = () => {
+    if (theme === "light") {
+      return <Sun className="h-4 w-4" />;
+    } else if (theme === "dark") {
+      return <Moon className="h-4 w-4" />;
+    } else {
+      return <Monitor className="h-4 w-4" />;
+    }
+  };
+
+  const getLabel = () => {
+    if (theme === "light") return "Light mode";
+    if (theme === "dark") return "Dark mode";
+    return "System mode";
+  };
+
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="h-9 w-9"
+      className="h-9 w-9 transition-all duration-200 hover:bg-accent"
+      title={getLabel()}
     >
-      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
+      {getIcon()}
+      <span className="sr-only">Toggle theme ({getLabel()})</span>
     </Button>
   );
 }
