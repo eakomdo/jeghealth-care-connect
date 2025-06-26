@@ -221,7 +221,7 @@ const SignupProfessional = () => {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     className="mt-1"
-                    placeholder="John"
+                    placeholder="Joseph"
                   />
                 </div>
                 <div>
@@ -235,7 +235,7 @@ const SignupProfessional = () => {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     className="mt-1"
-                    placeholder="Doe"
+                    placeholder="Ewool"
                   />
                 </div>
               </div>
@@ -253,7 +253,7 @@ const SignupProfessional = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     className="mt-1"
-                    placeholder="john.doe@hospital.com"
+                    placeholder="joseph.ewool@hospital.com"
                   />
                 </div>
                 <div>
