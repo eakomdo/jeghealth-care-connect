@@ -1,5 +1,4 @@
 
-import { Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
@@ -11,7 +10,6 @@ export function ThemeToggle() {
       title="Light mode"
       disabled
     >
-      <Sun className="h-4 w-4" />
       <span className="sr-only">Light mode</span>
     </Button>
   );
