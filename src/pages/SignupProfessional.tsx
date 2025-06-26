@@ -135,6 +135,9 @@ const SignupProfessional = () => {
     });
   };
 
+  // Create full name for verification
+  const fullName = `${formData.title} ${formData.firstName} ${formData.lastName}`.trim();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white py-12 px-6">
       <div className="w-full max-w-2xl mx-auto">
@@ -361,12 +364,13 @@ const SignupProfessional = () => {
                 </div>
               </div>
 
-              {/* License Verification Component */}
+              {/* License Verification Component - now with holder name */}
               <LicenseVerification
                 licenseNumber={formData.licenseNumber}
                 onLicenseNumberChange={handleLicenseNumberChange}
                 onDocumentUpload={setLicenseDocument}
                 onVerificationComplete={setIsLicenseVerified}
+                holderName={fullName}
               />
 
               {/* License Status Alert */}

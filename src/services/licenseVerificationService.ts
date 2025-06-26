@@ -4,6 +4,7 @@ interface LicenseVerificationRequest {
   country?: string;
   state?: string;
   document?: File;
+  holderName?: string; // Add holder name from signup form
 }
 
 interface LicenseVerificationResponse {
@@ -93,7 +94,7 @@ export class LicenseVerificationService {
   }
 
   async verifyLicense(request: LicenseVerificationRequest): Promise<LicenseVerificationResponse> {
-    console.log('Verifying license:', request.licenseNumber);
+    console.log('Verifying license:', request.licenseNumber, 'for:', request.holderName);
     
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -135,6 +136,9 @@ export class LicenseVerificationService {
     const expiryDate = new Date(licenseRecord.expiryDate);
     const currentDate = new Date();
     
+    // Use the entered name from the form or fall back to database name
+    const holderName = request.holderName || licenseRecord.holderName;
+    
     if (licenseRecord.status === 'expired' || expiryDate < currentDate) {
       console.log('License is expired');
       return {
@@ -142,7 +146,7 @@ export class LicenseVerificationService {
         status: 'expired',
         licenseDetails: {
           licenseNumber: licenseRecord.licenseNumber,
-          holderName: licenseRecord.holderName,
+          holderName: holderName,
           professionalType: licenseRecord.professionalType,
           issuingAuthority: licenseRecord.issuingAuthority,
           issueDate: licenseRecord.issueDate,
@@ -156,14 +160,14 @@ export class LicenseVerificationService {
       };
     }
 
-    // Valid license
+    // Valid license - use the entered name
     console.log('License verification successful');
     return {
       isValid: true,
       status: 'verified',
       licenseDetails: {
         licenseNumber: licenseRecord.licenseNumber,
-        holderName: licenseRecord.holderName,
+        holderName: holderName,
         professionalType: licenseRecord.professionalType,
         issuingAuthority: licenseRecord.issuingAuthority,
         issueDate: licenseRecord.issueDate,

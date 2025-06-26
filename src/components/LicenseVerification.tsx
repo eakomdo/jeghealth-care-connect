@@ -12,13 +12,15 @@ interface LicenseVerificationProps {
   onLicenseNumberChange: (value: string) => void;
   onDocumentUpload: (file: File | null) => void;
   onVerificationComplete: (isValid: boolean) => void;
+  holderName?: string; // Add holder name prop
 }
 
 const LicenseVerification = ({ 
   licenseNumber, 
   onLicenseNumberChange, 
   onDocumentUpload,
-  onVerificationComplete 
+  onVerificationComplete,
+  holderName
 }: LicenseVerificationProps) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'verified' | 'failed' | 'expired' | 'not_found'>('idle');
@@ -60,14 +62,15 @@ const LicenseVerification = ({
       return;
     }
 
-    console.log('Starting license verification for:', licenseNumber);
+    console.log('Starting license verification for:', licenseNumber, 'with holder name:', holderName);
     setVerificationStatus('verifying');
     setVerificationMessage('Verifying license with international databases...');
     setVerificationDetails(null);
 
     try {
       const result = await licenseVerificationService.verifyLicense({
-        licenseNumber: licenseNumber.trim()
+        licenseNumber: licenseNumber.trim(),
+        holderName: holderName // Pass the holder name from the form
       });
 
       console.log('Verification result:', result);
@@ -183,6 +186,13 @@ const LicenseVerification = ({
             </div>
             <p className="text-xs text-blue-600 mt-1">Note: EXPIRED123 will show as expired for testing</p>
           </div>
+
+          {/* Show holder name if provided */}
+          {holderName && (
+            <div className="p-3 bg-green-50 rounded-lg">
+              <p className="text-sm font-medium text-green-900">Verifying license for: <span className="font-semibold">{holderName}</span></p>
+            </div>
+          )}
 
           {/* License Number Input */}
           <div>
