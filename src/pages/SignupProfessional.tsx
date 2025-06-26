@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Shield, CheckCircle, Stethoscope, Heart, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -125,6 +126,13 @@ const SignupProfessional = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
+    });
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setFormData({
+      ...formData,
+      phone: value
     });
   };
 
@@ -252,14 +260,12 @@ const SignupProfessional = () => {
                   <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
                     Phone Number
                   </Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
+                  <PhoneInput
                     value={formData.phone}
-                    onChange={handleInputChange}
+                    onChange={handlePhoneChange}
                     className="mt-1"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="(555) 123-4567"
+                    defaultCountry="US"
                   />
                 </div>
               </div>

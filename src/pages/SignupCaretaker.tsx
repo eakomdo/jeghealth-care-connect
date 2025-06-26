@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Shield, User, Heart, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -118,6 +119,20 @@ const SignupCaretaker = () => {
     });
   };
 
+  const handlePhoneChange = (value: string) => {
+    setFormData({
+      ...formData,
+      phone: value
+    });
+  };
+
+  const handleEmergencyPhoneChange = (value: string) => {
+    setFormData({
+      ...formData,
+      emergencyPhone: value
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white py-12 px-6">
       <div className="w-full max-w-2xl mx-auto">
@@ -212,7 +227,7 @@ const SignupCaretaker = () => {
                 </div>
               </div>
 
-              {/* Email Address */}
+              {/* Email Address and Phone */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="email" className="text-sm font-medium text-gray-700">
@@ -233,15 +248,12 @@ const SignupCaretaker = () => {
                   <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
                     Phone Number *
                   </Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    required
+                  <PhoneInput
                     value={formData.phone}
-                    onChange={handleInputChange}
+                    onChange={handlePhoneChange}
                     className="mt-1"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="(555) 123-4567"
+                    defaultCountry="US"
                   />
                 </div>
               </div>
@@ -369,14 +381,12 @@ const SignupCaretaker = () => {
                 <Label htmlFor="emergencyPhone" className="text-sm font-medium text-gray-700">
                   Emergency Contact Phone
                 </Label>
-                <Input
-                  id="emergencyPhone"
-                  name="emergencyPhone"
-                  type="tel"
+                <PhoneInput
                   value={formData.emergencyPhone}
-                  onChange={handleInputChange}
+                  onChange={handleEmergencyPhoneChange}
                   className="mt-1"
-                  placeholder="+1 (555) 987-6543"
+                  placeholder="(555) 987-6543"
+                  defaultCountry="US"
                 />
               </div>
 
