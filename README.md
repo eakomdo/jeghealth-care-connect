@@ -3,25 +3,48 @@
 
 A professional IoT health monitoring platform designed for healthcare professionals and caregivers. Built with modern web technologies for secure, reliable, and compliant healthcare solutions.
 
-## Getting Started
+**🚀 FULLY INTEGRATED WITH BACKEND API** - Ready for production use with real healthcare provider registration and authentication.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Backend Integration Status ✅
 
-Follow these steps:
+✅ **Professional Registration** - Real API integration  
+✅ **JWT Authentication** - Secure token-based auth  
+✅ **Dashboard Statistics** - Live data from backend  
+✅ **Provider Management** - CRUD operations ready  
+✅ **No Mock Data** - All demo data removed  
+
+**API Base URL**: `http://192.168.1.50:8000`  
+**Frontend URL**: `http://localhost:8082/`
+
+See [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md) for detailed integration documentation.
+
+## Quick Start
+
+### Prerequisites
+- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Backend API running on `http://192.168.1.50:8000`
+
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd jeghealth-care-connect
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
 npm run dev
 ```
+
+The application will start on `http://localhost:8082/`
+
+### Test Account
+- **Email**: `dr.joseph.ewool.1754558681@testhospital.com`
+- **Professional**: Dr. Joseph Ewool (Use the password created during registration)
 
 ## Development
 

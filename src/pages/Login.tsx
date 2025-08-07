@@ -30,10 +30,10 @@ const Login = () => {
         password: formData.password
       });
 
-      if (loginResult.success) {
+      if (loginResult.success && loginResult.user) {
         toast({
           title: "Login Successful!",
-          description: `Welcome back, ${loginResult.user?.firstName}!`,
+          description: `Welcome back, ${loginResult.user.first_name}!`,
         });
         
         setTimeout(() => {
@@ -162,11 +162,14 @@ const Login = () => {
               </p>
             </div>
 
-            {/* Demo Account Info */}
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Account:</h3>
-              <p className="text-xs text-blue-700">
-                Use any email address from an account you've created. For demo purposes, any password will work for existing accounts.
+            {/* Test Account Info */}
+            <div className="mt-8 p-4 bg-green-50 rounded-lg">
+              <h3 className="text-sm font-medium text-green-800 mb-2">Test Account:</h3>
+              <p className="text-xs text-green-700 mb-1">
+                Email: dr.joseph.ewool.1754558681@testhospital.com
+              </p>
+              <p className="text-xs text-green-700">
+                Use the password you created when registering, or register a new account.
               </p>
             </div>
           </CardContent>

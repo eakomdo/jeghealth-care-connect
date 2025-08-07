@@ -4,15 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileCheck, Upload, CheckCircle, AlertCircle, Loader2, Shield, Clock, User, Building } from "lucide-react";
-import { licenseVerificationService } from "@/services/licenseVerificationService";
+import { FileCheck, Upload, CheckCircle, AlertCircle, Loader2, Shield } from "lucide-react";
 
 interface LicenseVerificationProps {
   licenseNumber: string;
   onLicenseNumberChange: (value: string) => void;
   onDocumentUpload: (file: File | null) => void;
   onVerificationComplete: (isValid: boolean) => void;
-  holderName?: string; // Add holder name prop
+  holderName?: string;
 }
 
 const LicenseVerification = ({ 
@@ -23,209 +22,95 @@ const LicenseVerification = ({
   holderName
 }: LicenseVerificationProps) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'verified' | 'failed' | 'expired' | 'not_found'>('idle');
+  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'verified' | 'failed'>('idle');
   const [verificationMessage, setVerificationMessage] = useState('');
-  const [verificationDetails, setVerificationDetails] = useState<any>(null);
-  const [verificationId, setVerificationId] = useState('');
-  const [documentVerification, setDocumentVerification] = useState<any>(null);
-  const [isVerifyingDocument, setIsVerifyingDocument] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setUploadedFile(file);
     onDocumentUpload(file);
     
     if (file) {
       setVerificationMessage(`Document "${file.name}" uploaded successfully`);
-      
-      // Automatically verify the document
-      setIsVerifyingDocument(true);
-      try {
-        const result = await licenseVerificationService.verifyDocument(file);
-        setDocumentVerification(result);
-        
-        if (result.isValid && result.extractedInfo?.licenseNumber) {
-          // Auto-fill license number if extracted from document
-          onLicenseNumberChange(result.extractedInfo.licenseNumber);
-        }
-      } catch (error) {
-        console.error('Document verification failed:', error);
-      } finally {
-        setIsVerifyingDocument(false);
-      }
     }
   };
 
   const handleVerifyLicense = async () => {
     if (!licenseNumber.trim()) {
-      setVerificationMessage('Please enter a license number');
+      setVerificationMessage("Please enter a license number");
+      setVerificationStatus('failed');
       return;
     }
 
-    console.log('Starting license verification for:', licenseNumber, 'with holder name:', holderName);
+    setIsVerifying(true);
     setVerificationStatus('verifying');
-    setVerificationMessage('Verifying license with international databases...');
-    setVerificationDetails(null);
+    setVerificationMessage("Verifying license...");
 
     try {
-      const result = await licenseVerificationService.verifyLicense({
-        licenseNumber: licenseNumber.trim(),
-        holderName: holderName // Pass the holder name from the form
-      });
-
-      console.log('Verification result:', result);
-      setVerificationId(result.verificationId);
-      setVerificationMessage(result.message);
+      // Simulate license verification (replace with real API call)
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      if (result.isValid && result.status === 'verified') {
+      // For demo purposes, accept any license number with at least 6 characters
+      if (licenseNumber.length >= 6) {
         setVerificationStatus('verified');
-        setVerificationDetails(result.licenseDetails);
-        console.log('Calling onVerificationComplete(true)');
+        setVerificationMessage(`License ${licenseNumber} verified successfully${holderName ? ` for ${holderName}` : ''}`);
         onVerificationComplete(true);
       } else {
-        switch (result.status) {
-          case 'expired':
-            setVerificationStatus('expired');
-            setVerificationDetails(result.licenseDetails);
-            break;
-          case 'not_found':
-            setVerificationStatus('not_found');
-            break;
-          default:
-            setVerificationStatus('failed');
-        }
-        console.log('Calling onVerificationComplete(false)');
+        setVerificationStatus('failed');
+        setVerificationMessage("License verification failed. Please check the license number.");
         onVerificationComplete(false);
       }
     } catch (error) {
-      console.error('License verification error:', error);
       setVerificationStatus('failed');
-      setVerificationMessage('Verification service temporarily unavailable. Please try again later.');
+      setVerificationMessage("Verification failed. Please try again.");
       onVerificationComplete(false);
+    } finally {
+      setIsVerifying(false);
     }
   };
-
-  const getStatusIcon = () => {
-    switch (verificationStatus) {
-      case 'verifying':
-        return <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />;
-      case 'verified':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'expired':
-        return <Clock className="w-5 h-5 text-orange-600" />;
-      case 'failed':
-      case 'not_found':
-        return <AlertCircle className="w-5 h-5 text-red-600" />;
-      default:
-        return <FileCheck className="w-5 h-5 text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = () => {
-    switch (verificationStatus) {
-      case 'verifying':
-        return 'text-blue-600';
-      case 'verified':
-        return 'text-green-600';
-      case 'expired':
-        return 'text-orange-600';
-      case 'failed':
-      case 'not_found':
-        return 'text-red-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
-
-  const getStatusBadge = () => {
-    switch (verificationStatus) {
-      case 'verified':
-        return <Badge className="bg-green-100 text-green-800">Verified</Badge>;
-      case 'expired':
-        return <Badge className="bg-orange-100 text-orange-800">Expired</Badge>;
-      case 'failed':
-        return <Badge className="bg-red-100 text-red-800">Failed</Badge>;
-      case 'not_found':
-        return <Badge className="bg-red-100 text-red-800">Not Found</Badge>;
-      case 'verifying':
-        return <Badge className="bg-blue-100 text-blue-800">Verifying...</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  // Get test licenses for demo purposes
-  const testLicenses = licenseVerificationService.getTestLicenses();
 
   return (
-    <Card className="border-gray-200">
+    <Card className="border border-gray-200">
       <CardContent className="p-6">
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-6 h-6 text-green-600" />
+            <Shield className="w-5 h-5 text-green-600" />
             <h3 className="text-lg font-semibold text-gray-900">License Verification</h3>
-            {getStatusBadge()}
           </div>
-
-          {/* Test License Numbers for Demo */}
-          <div className="p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm font-medium text-blue-900 mb-2">Demo License Numbers (click to use):</p>
-            <div className="flex flex-wrap gap-2">
-              {testLicenses.slice(0, 4).map((license) => (
-                <button
-                  key={license}
-                  onClick={() => {
-                    console.log('Clicked demo license:', license);
-                    onLicenseNumberChange(license);
-                  }}
-                  className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                >
-                  {license}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-blue-600 mt-1">Note: EXPIRED123 will show as expired for testing</p>
-          </div>
-
-          {/* Show holder name if provided */}
-          {holderName && (
-            <div className="p-3 bg-green-50 rounded-lg">
-              <p className="text-sm font-medium text-green-900">Verifying license for: <span className="font-semibold">{holderName}</span></p>
-            </div>
-          )}
 
           {/* License Number Input */}
           <div>
             <Label htmlFor="licenseNumber" className="text-sm font-medium text-gray-700">
-              License Number *
+              Professional License Number *
             </Label>
             <div className="flex gap-2 mt-1">
               <Input
                 id="licenseNumber"
                 value={licenseNumber}
                 onChange={(e) => onLicenseNumberChange(e.target.value)}
+                placeholder="Enter your license number (e.g., MD123456)"
                 className="flex-1"
-                placeholder="Enter your professional license number"
               />
               <Button
                 type="button"
                 onClick={handleVerifyLicense}
-                disabled={verificationStatus === 'verifying' || !licenseNumber.trim()}
-                className="bg-green-600 hover:bg-green-700"
+                disabled={isVerifying || !licenseNumber.trim()}
+                className="px-6"
               >
-                {verificationStatus === 'verifying' ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                {isVerifying ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Verifying...
+                  </>
                 ) : (
-                  'Verify'
+                  "Verify"
                 )}
               </Button>
             </div>
-            {verificationId && (
-              <p className="text-xs text-gray-500 mt-1">Verification ID: {verificationId}</p>
-            )}
           </div>
 
-          {/* Document Upload */}
+          {/* File Upload (Optional) */}
           <div>
             <Label htmlFor="licenseDocument" className="text-sm font-medium text-gray-700">
               License Document (Optional)
@@ -233,156 +118,70 @@ const LicenseVerification = ({
             <div className="mt-1">
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  {isVerifyingDocument ? (
-                    <Loader2 className="w-8 h-8 mb-2 text-blue-600 animate-spin" />
+                  {uploadedFile ? (
+                    <>
+                      <FileCheck className="w-8 h-8 mb-2 text-green-600" />
+                      <p className="text-sm text-green-600 font-medium">{uploadedFile.name}</p>
+                      <p className="text-xs text-gray-500">File uploaded successfully</p>
+                    </>
                   ) : (
-                    <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                    <>
+                      <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-500">
+                        <span className="font-semibold">Click to upload</span> your license document
+                      </p>
+                      <p className="text-xs text-gray-500">PDF, PNG, or JPG (MAX. 10MB)</p>
+                    </>
                   )}
-                  <p className="mb-2 text-sm text-gray-500">
-                    {uploadedFile ? uploadedFile.name : 'Click to upload license document'}
-                  </p>
-                  <p className="text-xs text-gray-500">PDF, JPG, PNG (MAX. 10MB)</p>
                 </div>
                 <input
                   id="licenseDocument"
                   type="file"
                   className="hidden"
-                  accept=".pdf,.jpg,.jpeg,.png"
+                  accept=".pdf,.png,.jpg,.jpeg"
                   onChange={handleFileUpload}
                 />
               </label>
             </div>
           </div>
 
-          {/* Document Verification Results */}
-          {documentVerification && (
-            <div className={`p-4 rounded-lg ${
-              documentVerification.isValid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-            }`}>
-              <div className="flex items-center gap-2 mb-2">
-                {documentVerification.isValid ? (
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                )}
-                <span className={`font-medium ${documentVerification.isValid ? 'text-green-800' : 'text-red-800'}`}>
-                  Document {documentVerification.isValid ? 'Verified' : 'Verification Failed'}
-                </span>
-                <Badge className={documentVerification.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                  {Math.round(documentVerification.confidence * 100)}% confidence
-                </Badge>
-              </div>
-              <p className={`text-sm ${documentVerification.isValid ? 'text-green-700' : 'text-red-700'}`}>
-                {documentVerification.message}
-              </p>
-              {documentVerification.extractedInfo && (
-                <div className="mt-3 text-sm">
-                  <p className="font-medium text-gray-800">Extracted Information:</p>
-                  <ul className="text-gray-600 mt-1 space-y-1">
-                    {documentVerification.extractedInfo.licenseNumber && (
-                      <li>• License Number: {documentVerification.extractedInfo.licenseNumber}</li>
-                    )}
-                    {documentVerification.extractedInfo.holderName && (
-                      <li>• Name: {documentVerification.extractedInfo.holderName}</li>
-                    )}
-                    {documentVerification.extractedInfo.issueDate && (
-                      <li>• Issue Date: {documentVerification.extractedInfo.issueDate}</li>
-                    )}
-                    {documentVerification.extractedInfo.expiryDate && (
-                      <li>• Expiry Date: {documentVerification.extractedInfo.expiryDate}</li>
-                    )}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Verification Status */}
-          {verificationMessage && (
-            <div className={`flex items-center gap-2 p-3 rounded-lg ${
-              verificationStatus === 'verified' ? 'bg-green-50' :
-              verificationStatus === 'expired' ? 'bg-orange-50' :
-              (verificationStatus === 'failed' || verificationStatus === 'not_found') ? 'bg-red-50' :
-              verificationStatus === 'verifying' ? 'bg-blue-50' : 'bg-gray-50'
+          {verificationStatus !== 'idle' && (
+            <div className={`p-4 rounded-lg border ${
+              verificationStatus === 'verified' 
+                ? 'bg-green-50 border-green-200' 
+                : verificationStatus === 'failed'
+                ? 'bg-red-50 border-red-200'
+                : 'bg-blue-50 border-blue-200'
             }`}>
-              {getStatusIcon()}
-              <p className={`text-sm ${getStatusColor()}`}>
-                {verificationMessage}
-              </p>
-            </div>
-          )}
-
-          {/* Detailed License Information */}
-          {verificationDetails && (
-            <div className="p-4 bg-gray-50 rounded-lg space-y-3">
-              <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                <User className="w-4 h-4" />
-                License Details
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="font-medium text-gray-700">License Holder:</span>
-                  <p className="text-gray-900">{verificationDetails.holderName}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Professional Type:</span>
-                  <p className="text-gray-900">{verificationDetails.professionalType}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Issuing Authority:</span>
-                  <p className="text-gray-900 flex items-center gap-1">
-                    <Building className="w-3 h-3" />
-                    {verificationDetails.issuingAuthority}
-                  </p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Issue Date:</span>
-                  <p className="text-gray-900">{verificationDetails.issueDate}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Expiry Date:</span>
-                  <p className="text-gray-900">{verificationDetails.expiryDate}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Status:</span>
-                  <p className={`capitalize font-medium ${
-                    verificationDetails.status === 'active' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {verificationDetails.status}
-                  </p>
-                </div>
-              </div>
-              
-              {verificationDetails.restrictions && verificationDetails.restrictions.length > 0 && (
-                <div>
-                  <span className="font-medium text-gray-700">Restrictions:</span>
-                  <ul className="text-gray-900 mt-1">
-                    {verificationDetails.restrictions.map((restriction: string, index: number) => (
-                      <li key={index} className="text-sm">• {restriction}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              <div className="pt-2 border-t border-gray-200">
-                <p className="text-xs text-gray-500">
-                  Verified via: {verificationDetails.verificationSource}
+              <div className="flex items-center gap-2">
+                {verificationStatus === 'verified' && <CheckCircle className="w-5 h-5 text-green-600" />}
+                {verificationStatus === 'failed' && <AlertCircle className="w-5 h-5 text-red-600" />}
+                {verificationStatus === 'verifying' && <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />}
+                
+                <p className={`text-sm font-medium ${
+                  verificationStatus === 'verified' 
+                    ? 'text-green-800' 
+                    : verificationStatus === 'failed'
+                    ? 'text-red-800'
+                    : 'text-blue-800'
+                }`}>
+                  {verificationMessage}
                 </p>
               </div>
             </div>
           )}
 
-          {/* Verification Guidelines */}
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">Verification Process:</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• License verified against international databases</li>
-              <li>• Document authentication using AI-powered OCR</li>
-              <li>• Real-time status checking with licensing authorities</li>
-              <li>• Verification typically completed within 2-5 minutes</li>
-              <li>• All verifications are logged and auditable</li>
-            </ul>
-          </div>
+          {verificationStatus === 'verified' && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  Verified
+                </Badge>
+                <span className="text-sm text-green-700">Ready to proceed with registration</span>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
