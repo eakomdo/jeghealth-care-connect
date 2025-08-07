@@ -49,41 +49,93 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps) => {
 
   // Load user data on component mount
   useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      // First try to fetch fresh data from API
+      const { providerService } = await import('@/services/providerService');
+      const profile = await providerService.getProviderProfile();
+      
+      console.log('Fetched profile from API:', profile);
+      
+      if (profile) {
+        setUserSettings({
+          name: `${profile.professional_title || ''}${profile.professional_title ? ' ' : ''}${profile.first_name} ${profile.last_name}`.trim(),
+          email: profile.email || '',
+          title: profile.professional_title || '',
+          firstName: profile.first_name || '',
+          lastName: profile.last_name || '',
+          department: profile.organization_facility || '',
+          organization: profile.organization_facility || '',
+          license: profile.license_number || '',
+          licenseNumber: profile.license_number || '',
+          phone: profile.phone_number || '',
+          timezone: "UTC-5"
+        });
+        
+        console.log('Updated settings from API profile');
+        return;
+      }
+    } catch (error) {
+      console.log('Failed to fetch profile from API, falling back to localStorage:', error);
+    }
+    
+    // Fallback to localStorage data
     const storedUserData = localStorage.getItem('userData');
     const currentUser = localStorage.getItem('currentUser');
     
+    console.log('Loading settings - userData:', storedUserData);
+    console.log('Loading settings - currentUser:', currentUser);
+    
+    let userData = null;
+    
     if (storedUserData) {
-      const userData = JSON.parse(storedUserData);
-      setUserSettings({
-        name: `${userData.title || ''}${userData.title ? ' ' : ''}${userData.firstName} ${userData.lastName}`.trim(),
-        email: userData.email || '',
-        title: userData.title || '',
-        firstName: userData.firstName || '',
-        lastName: userData.lastName || '',
-        department: userData.organization || '',
-        organization: userData.organization || '',
-        license: userData.licenseNumber || '',
-        licenseNumber: userData.licenseNumber || '',
-        phone: userData.phone || '',
-        timezone: "UTC-5"
-      });
+      userData = JSON.parse(storedUserData);
     } else if (currentUser) {
-      const userData = JSON.parse(currentUser);
+      userData = JSON.parse(currentUser);
+    }
+    
+    if (userData) {
+      console.log('Parsed user data:', userData);
+      
+      // Handle both old and new field name formats
+      const firstName = userData.first_name || userData.firstName || '';
+      const lastName = userData.last_name || userData.lastName || '';
+      const title = userData.professional_title || userData.title || '';
+      const organization = userData.organization_facility || userData.organization || '';
+      const phone = userData.phone_number || userData.phone || '';
+      const licenseNumber = userData.license_number || userData.licenseNumber || userData.license || '';
+      
       setUserSettings({
-        name: `${userData.title || ''}${userData.title ? ' ' : ''}${userData.firstName} ${userData.lastName}`.trim(),
+        name: `${title}${title ? ' ' : ''}${firstName} ${lastName}`.trim(),
         email: userData.email || '',
-        title: userData.title || '',
-        firstName: userData.firstName || '',
-        lastName: userData.lastName || '',
-        department: userData.organization || '',
-        organization: userData.organization || '',
-        license: userData.licenseNumber || '',
-        licenseNumber: userData.licenseNumber || '',
-        phone: userData.phone || '',
+        title: title,
+        firstName: firstName,
+        lastName: lastName,
+        department: organization,
+        organization: organization,
+        license: licenseNumber,
+        licenseNumber: licenseNumber,
+        phone: phone,
         timezone: "UTC-5"
       });
+      
+      console.log('Updated user settings from localStorage:', {
+        name: `${title}${title ? ' ' : ''}${firstName} ${lastName}`.trim(),
+        email: userData.email || '',
+        title: title,
+        firstName: firstName,
+        lastName: lastName,
+        organization: organization,
+        phone: phone,
+        licenseNumber: licenseNumber
+      });
+    } else {
+      console.log('No user data found in localStorage');
     }
-  }, []);
+  };
 
   // Notification Settings
   const [notificationSettings, setNotificationSettings] = useState({

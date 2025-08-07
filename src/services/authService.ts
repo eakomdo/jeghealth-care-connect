@@ -228,10 +228,33 @@ export class AuthService {
         localStorage.setItem('refresh_token', response.tokens.refresh);
       }
 
-      const userAccount: UserAccount = {
-        ...response.authUser,
-        userType: 'professional'
-      };
+      // Create user account object with proper field mapping
+      let userAccount: UserAccount;
+      
+      if (response.authUser) {
+        userAccount = {
+          ...response.authUser,
+          userType: 'professional'
+        };
+      } else {
+        // Fallback: create user account from original data
+        userAccount = {
+          id: response.id || 0,
+          email: userData.email,
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          title: userData.professional_title,
+          organization: userData.organization,
+          role: userData.role,
+          license_number: userData.licenseNumber,
+          phone: userData.phone,
+          userType: 'professional',
+          is_active: true,
+          is_verified: false
+        };
+      }
+      
+      console.log('Storing user account:', userAccount);
 
       localStorage.setItem('currentUser', JSON.stringify(userAccount));
       localStorage.setItem('userType', 'professional');

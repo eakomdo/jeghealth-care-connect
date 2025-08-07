@@ -158,6 +158,14 @@ const SignupProfessional = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Only allow submission on the final step
+    if (currentStep !== totalSteps) {
+      console.log('Form submitted but not on final step. Current step:', currentStep);
+      return;
+    }
+    
+    console.log('Final step submission - proceeding with registration');
+    
     // Validate all steps before submission
     let allValid = true;
     for (let i = 1; i <= totalSteps; i++) {
@@ -176,7 +184,7 @@ const SignupProfessional = () => {
       return;
     }
 
-    if (currentStep === 5 && !isLicenseVerified) {
+    if (!isLicenseVerified) {
       toast({
         title: "License Verification Required",
         description: "Please verify your professional license before submitting the request.",
